@@ -368,7 +368,7 @@ function initAddForm() {
     e.preventDefault();
     const date = document.getElementById('bill-date').value;
     const item = document.getElementById('bill-item').value.trim();
-    const amount = parseFloat(document.getElementById('bill-amount').value);
+    const amount = Math.round(parseFloat(document.getElementById('bill-amount').value) * 100) / 100;
     const reason = document.getElementById('bill-reason').value.trim();
     if (!state.selectedCategory) { toast('选个类别～'); return; }
     if (!state.selectedSatisfaction) { toast('选个满足感～'); return; }
@@ -595,7 +595,7 @@ window.saveEdit = async function(id) {
   const ok = await updateBill(id, {
     date: document.getElementById('edit-date').value,
     item: document.getElementById('edit-item').value.trim(),
-    amount: parseFloat(document.getElementById('edit-amount').value),
+    amount: Math.round(parseFloat(document.getElementById('edit-amount').value) * 100) / 100,
     category: catEl.dataset.cat,
     satisfaction: satEl.dataset.sat,
     reason: document.getElementById('edit-reason').value.trim() || null,
