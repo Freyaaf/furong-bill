@@ -73,8 +73,14 @@ let state = {
 let chartInstance = null;
 let catChartInstance = null;
 
-function todayYM() { return new Date().toISOString().slice(0, 7); }
-function todayDate() { return new Date().toISOString().slice(0, 10); }
+function todayYM() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function todayDate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function formatYM(ym) {
   const [y, m] = ym.split('-');
