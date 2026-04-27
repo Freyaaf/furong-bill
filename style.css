@@ -10,8 +10,8 @@
   --indigo: #8E7AA8;
   --snow-grey: #7A6B8E;
   --aubergine: #5C4E6E;
-  --ink: #3D3450;
-  --abyss: #2B2438;
+  --ink: #2B2438;
+  --abyss: #1a1525;
 
   --primary: var(--indigo);
   --primary-light: var(--moon-white);
@@ -20,7 +20,7 @@
   --bg: var(--moon-white);
   --surface: var(--paper);
   --text: var(--ink);
-  --text-muted: var(--snow-grey);
+  --text-muted: var(--aubergine);
   --border: var(--lilac);
   --shadow: 0 2px 8px rgba(92,78,110,0.06);
   --radius: 4px;
@@ -31,7 +31,7 @@
 html, body {
   height: 100%;
   font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', 'Songti SC', 'STSong', '宋体', serif;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text);
   line-height: 1.8;
   background:
@@ -56,8 +56,8 @@ html, body {
   z-index: 100;
 }
 .app-header h1 {
-  font-size: 17px; font-weight: bold;
-  color: var(--aubergine); letter-spacing: 0.25em;
+  font-size: 18px; font-weight: bold;
+  color: var(--ink); letter-spacing: 0.25em;
 }
 
 /* ===== Main ===== */
@@ -96,9 +96,9 @@ html, body {
   padding: 6px 0;
   font-family: inherit;
 }
-.nav-btn.active { color: var(--aubergine); }
+.nav-btn.active { color: var(--ink); }
 .nav-icon { font-size: 18px; font-weight: bold; color: inherit; }
-.nav-label { font-size: 11px; font-weight: normal; letter-spacing: 0.15em; }
+.nav-label { font-size: 11px; font-weight: bold; letter-spacing: 0.15em; }
 
 /* ===== Card ===== */
 .card {
@@ -115,7 +115,7 @@ html, body {
 }
 .type-btn {
   flex: 1; padding: 10px 0; border: none; background: transparent;
-  font-size: 14px; font-weight: normal; color: var(--snow-grey);
+  font-size: 15px; font-weight: bold; color: var(--aubergine);
   cursor: pointer; transition: all 0.3s;
   font-family: inherit; letter-spacing: 0.15em;
 }
@@ -131,8 +131,8 @@ html, body {
 /* ===== Form ===== */
 .form-group { margin-bottom: 18px; }
 .form-group label {
-  display: block; font-size: 13px; font-weight: bold;
-  color: var(--aubergine); margin-bottom: 6px;
+  display: block; font-size: 14px; font-weight: bold;
+  color: var(--ink); margin-bottom: 6px;
   letter-spacing: 0.1em;
 }
 .form-group input[type="text"],
@@ -143,7 +143,7 @@ html, body {
 .form-group select {
   width: 100%; padding: 10px 12px;
   border: 1px solid var(--lilac); border-radius: var(--radius);
-  font-size: 15px; color: var(--ink); background: var(--moon-white);
+  font-size: 16px; color: var(--ink); background: var(--moon-white);
   outline: none; transition: border-color 0.3s;
   font-family: inherit;
 }
@@ -219,15 +219,15 @@ html, body {
 .chip {
   padding: 6px 14px;
   border: 1px solid var(--lilac); border-radius: 2px;
-  font-size: 13px; cursor: pointer; background: var(--paper);
+  font-size: 14px; cursor: pointer; background: var(--paper);
   transition: all 0.3s; user-select: none;
-  white-space: nowrap; color: var(--snow-grey);
+  white-space: nowrap; color: var(--aubergine);
   font-family: inherit; letter-spacing: 0.05em;
 }
 .chip:active { transform: scale(0.96); }
 .chip.selected {
-  border-color: var(--grape); background: rgba(168,150,184,0.12);
-  color: var(--aubergine); font-weight: normal;
+  border-color: var(--ink); background: rgba(168,150,184,0.15);
+  color: var(--ink); font-weight: bold;
 }
 
 /* ===== Satisfaction Bar ===== */
@@ -243,7 +243,7 @@ html, body {
 }
 .sat-option:active { transform: scale(0.94); }
 .sat-option .sat-emoji { font-size: 22px; }
-.sat-option .sat-label { font-size: 10px; color: var(--snow-grey); line-height: 1.2; text-align: center; letter-spacing: 0; font-family: inherit; }
+.sat-option .sat-label { font-size: 11px; color: var(--aubergine); line-height: 1.2; text-align: center; letter-spacing: 0; font-family: inherit; }
 .sat-option.selected {
   border-color: var(--grape); background: rgba(168,150,184,0.10);
   box-shadow: 0 0 0 2px rgba(168,150,184,0.08);
@@ -255,10 +255,10 @@ html, body {
   border: 1px solid var(--lotus-root);
   border-radius: var(--radius); padding: 14px 16px;
   margin-bottom: 12px; font-size: 14px;
-  color: var(--aubergine); line-height: 1.8;
+  color: var(--ink); line-height: 1.8;
 }
 .greeting-card .greeting-label {
-  font-size: 11px; color: var(--grape); margin-bottom: 4px;
+  font-size: 12px; color: var(--aubergine); margin-bottom: 4px;
   letter-spacing: 0.15em;
 }
 
@@ -270,11 +270,11 @@ html, body {
   margin-bottom: 12px; line-height: 1.8;
 }
 .review-card .review-label {
-  font-size: 12px; color: var(--grape); margin-bottom: 8px;
+  font-size: 12px; color: var(--aubergine); margin-bottom: 8px;
   letter-spacing: 0.15em;
 }
 .review-card .review-text {
-  font-size: 14px; color: var(--aubergine);
+  font-size: 15px; color: var(--ink);
 }
 
 /* ===== Month Navigation ===== */
@@ -291,8 +291,8 @@ html, body {
 }
 .month-arrow:active { background: var(--lotus-root); }
 .month-label {
-  font-size: 16px; font-weight: bold; min-width: 120px;
-  text-align: center; color: var(--aubergine);
+  font-size: 17px; font-weight: bold; min-width: 120px;
+  text-align: center; color: var(--ink);
   letter-spacing: 0.15em;
 }
 
@@ -304,16 +304,16 @@ html, body {
   display: flex; justify-content: space-between; align-items: center;
   font-size: 14px;
 }
-.month-summary-bar .total { font-weight: bold; color: var(--aubergine); font-size: 17px; }
+.month-summary-bar .total { font-weight: bold; color: var(--ink); font-size: 17px; }
 .month-summary-bar .count { color: var(--snow-grey); }
 .bills-filter { margin-bottom: 10px; }
 .filter-chips {
   display: flex; gap: 6px; flex-wrap: wrap;
 }
 .filter-chip {
-  padding: 5px 12px; border-radius: 2px; font-size: 12px;
+  padding: 5px 12px; border-radius: 2px; font-size: 13px;
   background: var(--moon-white); border: 1px solid var(--lilac);
-  color: var(--snow-grey); cursor: pointer; white-space: nowrap;
+  color: var(--aubergine); cursor: pointer; white-space: nowrap;
   font-family: inherit; letter-spacing: 0.05em;
 }
 .filter-chip.selected {
@@ -322,7 +322,7 @@ html, body {
 
 .sort-toggle {
   background: var(--moon-white); border: 1px solid var(--lilac); border-radius: 2px;
-  padding: 4px 10px; font-size: 12px; color: var(--aubergine);
+  padding: 4px 10px; font-size: 13px; color: var(--ink);
   cursor: pointer; white-space: nowrap;
   font-family: inherit; letter-spacing: 0.05em;
 }
@@ -331,7 +331,7 @@ html, body {
 /* ===== Bills List ===== */
 .date-group { margin-bottom: 16px; }
 .date-header {
-  font-size: 13px; font-weight: bold; color: var(--grape);
+  font-size: 14px; font-weight: bold; color: var(--aubergine);
   padding: 4px 0; margin-bottom: 6px;
   border-bottom: 1px solid var(--lotus-root);
   letter-spacing: 0.1em;
@@ -349,7 +349,7 @@ html, body {
 }
 .bill-left { flex: 1; min-width: 0; }
 .bill-name {
-  font-size: 15px; font-weight: 500; color: var(--ink);
+  font-size: 16px; font-weight: bold; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 220px;
 }
@@ -357,14 +357,14 @@ html, body {
   display: flex; align-items: center; gap: 6px; margin-top: 3px;
 }
 .bill-category-tag {
-  font-size: 11px; padding: 2px 8px;
+  font-size: 12px; padding: 2px 8px;
   border-radius: 2px; background: var(--moon-white);
-  color: var(--grape); border: 1px solid var(--lotus-root);
+  color: var(--aubergine); border: 1px solid var(--lotus-root);
   font-family: inherit;
 }
 .bill-sat { font-size: 16px; }
 .bill-amount {
-  font-size: 15px; font-weight: bold; color: var(--aubergine);
+  font-size: 16px; font-weight: bold; color: var(--ink);
   margin-left: 10px; white-space: nowrap;
   font-family: 'Songti SC', 'STSong', '宋体', serif;
 }
@@ -381,7 +381,7 @@ html, body {
   border-radius: 2px; margin-top: 6px;
   border-left: 2px solid var(--grape);
 }
-.bill-detail .follow-up-label { font-size: 11px; color: var(--grape); font-weight: normal; letter-spacing: 0.1em; }
+.bill-detail .follow-up-label { font-size: 12px; color: var(--aubergine); font-weight: bold; letter-spacing: 0.1em; }
 .bill-actions {
   display: flex; gap: 8px; margin-top: 10px;
 }
@@ -393,15 +393,15 @@ html, body {
   padding: 16px; margin-bottom: 12px; box-shadow: none;
 }
 .summary-card h3 {
-  font-size: 14px; color: var(--grape); margin-bottom: 10px; font-weight: bold;
+  font-size: 15px; color: var(--aubergine); margin-bottom: 10px; font-weight: bold;
   letter-spacing: 0.15em;
 }
 .summary-total {
-  font-size: 28px; font-weight: bold; color: var(--aubergine);
+  font-size: 30px; font-weight: bold; color: var(--ink);
   text-align: center; padding: 12px 0;
   font-family: 'Songti SC', 'STSong', '宋体', serif;
 }
-.summary-total .unit { font-size: 14px; font-weight: normal; color: var(--grape); }
+.summary-total .unit { font-size: 15px; font-weight: normal; color: var(--aubergine); }
 .summary-compare {
   text-align: center; font-size: 13px; color: var(--snow-grey);
   margin-top: 4px;
@@ -419,7 +419,7 @@ html, body {
 }
 .top-list li:last-child { border: none; }
 .top-list .item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-list .item-amount { font-weight: bold; color: var(--aubergine); margin-left: 8px; font-family: 'Songti SC', 'STSong', '宋体', serif; }
+.top-list .item-amount { font-weight: bold; color: var(--ink); margin-left: 8px; font-family: 'Songti SC', 'STSong', '宋体', serif; }
 .top-list .item-sat { margin-right: 6px; }
 
 .sat-dist { display: flex; flex-direction: column; gap: 6px; }
