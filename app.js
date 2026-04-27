@@ -332,9 +332,16 @@ async function updateGreeting() {
   el.innerHTML = `<div class="greeting-label">— 傅融说 —</div>${getGreeting()}${extra}`;
 }
 
+function fixDecimalInput(el) {
+  el.addEventListener('input', function() {
+    this.value = this.value.replace(/[，,]/g, '.');
+  });
+}
+
 // ===== 记账 Tab =====
 function initAddForm() {
   document.getElementById('bill-date').value = todayDate();
+  fixDecimalInput(document.getElementById('bill-amount'));
   updateGreeting();
 
   const chipsEl = document.getElementById('category-chips');
@@ -556,7 +563,7 @@ async function openEditModal(id) {
       <input type="text" id="edit-item" value="${esc(bill.item)}">
     </div>
     <div class="form-group"><label>金额</label>
-      <input type="text" id="edit-amount" inputmode="decimal" pattern="[0-9]*\\.?[0-9]*" value="${bill.amount}">
+      <input type="text" id="edit-amount" inputmode="decimal" value="${bill.amount}">
     </div>
     <div class="form-group"><label>类别</label>
       <div class="chips" id="edit-cats">${catOptions}</div>
@@ -573,6 +580,7 @@ async function openEditModal(id) {
     </div>
   `);
 
+  fixDecimalInput(document.getElementById('edit-amount'));
   document.getElementById('edit-cats').addEventListener('click', e => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
