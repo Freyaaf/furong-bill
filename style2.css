@@ -30,7 +30,7 @@
 
 html, body {
   height: 100%;
-  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'LXGW WenKai', 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
   font-size: 16px;
   color: var(--text);
   line-height: 1.8;
