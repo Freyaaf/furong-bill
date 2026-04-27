@@ -131,6 +131,29 @@ html, body {
 }
 .form-group textarea { resize: vertical; font-family: inherit; }
 
+.numpad {
+  display: grid; grid-template-columns: 1fr; gap: 0;
+  margin-top: 8px; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--lilac); background: var(--moon-white);
+}
+.numpad.hidden { display: none; }
+.numpad-row { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.numpad-key {
+  padding: 14px 0; font-size: 20px; font-weight: 500;
+  border: none; background: var(--paper); color: var(--ink);
+  cursor: pointer; text-align: center;
+  border-right: 1px solid var(--lilac); border-bottom: 1px solid var(--lilac);
+}
+.numpad-row:last-child .numpad-key { border-bottom: none; }
+.numpad-key:last-child { border-right: none; }
+.numpad-key:active { background: var(--lilac); }
+.numpad-del { font-size: 18px; color: var(--grape); }
+
+#bill-amount.numpad-active {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(142,122,168,0.12);
+}
+
 .text-muted { color: var(--text-muted); font-weight: 400; }
 
 .btn-primary {

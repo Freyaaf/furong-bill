@@ -338,10 +338,42 @@ function fixDecimalInput(el) {
   });
 }
 
+function initNumpad() {
+  const input = document.getElementById('bill-amount');
+  const pad = document.getElementById('numpad');
+
+  input.addEventListener('click', () => {
+    pad.classList.remove('hidden');
+    input.classList.add('numpad-active');
+  });
+
+  pad.addEventListener('click', e => {
+    const key = e.target.closest('.numpad-key');
+    if (!key) return;
+    e.preventDefault();
+    const val = input.value;
+    if (key.classList.contains('numpad-del')) {
+      input.value = val.slice(0, -1);
+    } else if (key.textContent === '.') {
+      if (!val.includes('.')) input.value = val + '.';
+    } else {
+      if (val.includes('.') && val.split('.')[1].length >= 2) return;
+      input.value = val + key.textContent;
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#numpad') && e.target !== input) {
+      pad.classList.add('hidden');
+      input.classList.remove('numpad-active');
+    }
+  });
+}
+
 // ===== 记账 Tab =====
 function initAddForm() {
   document.getElementById('bill-date').value = todayDate();
-  fixDecimalInput(document.getElementById('bill-amount'));
+  initNumpad();
   updateGreeting();
 
   const chipsEl = document.getElementById('category-chips');
@@ -563,7 +595,7 @@ async function openEditModal(id) {
       <input type="text" id="edit-item" value="${esc(bill.item)}">
     </div>
     <div class="form-group"><label>金额</label>
-      <input type="text" id="edit-amount" inputmode="decimal" value="${bill.amount}">
+      <input type="text" id="edit-amount" inputmode="decimal" value="${parseFloat(bill.amount).toFixed(2)}">
     </div>
     <div class="form-group"><label>类别</label>
       <div class="chips" id="edit-cats">${catOptions}</div>
