@@ -32,6 +32,7 @@ html, body {
   height: 100%;
   font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
   font-size: 16px;
+  font-weight: 500;
   color: var(--text);
   line-height: 1.8;
   background:
@@ -56,7 +57,7 @@ html, body {
   z-index: 100;
 }
 .app-header h1 {
-  font-size: 18px; font-weight: bold;
+  font-size: 18px; font-weight: 900;
   color: var(--ink); letter-spacing: 0.25em;
 }
 
@@ -131,7 +132,7 @@ html, body {
 /* ===== Form ===== */
 .form-group { margin-bottom: 18px; }
 .form-group label {
-  display: block; font-size: 14px; font-weight: bold;
+  display: block; font-size: 14px; font-weight: 700;
   color: var(--ink); margin-bottom: 6px;
   letter-spacing: 0.1em;
 }
@@ -291,7 +292,7 @@ html, body {
 }
 .month-arrow:active { background: var(--lotus-root); }
 .month-label {
-  font-size: 17px; font-weight: bold; min-width: 120px;
+  font-size: 17px; font-weight: 900; min-width: 120px;
   text-align: center; color: var(--ink);
   letter-spacing: 0.15em;
 }
@@ -304,7 +305,7 @@ html, body {
   display: flex; justify-content: space-between; align-items: center;
   font-size: 14px;
 }
-.month-summary-bar .total { font-weight: bold; color: var(--ink); font-size: 17px; }
+.month-summary-bar .total { font-weight: 900; color: var(--ink); font-size: 17px; }
 .month-summary-bar .count { color: var(--snow-grey); }
 .bills-filter { margin-bottom: 10px; }
 .filter-chips {
@@ -349,7 +350,7 @@ html, body {
 }
 .bill-left { flex: 1; min-width: 0; }
 .bill-name {
-  font-size: 16px; font-weight: bold; color: var(--ink);
+  font-size: 16px; font-weight: 700; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 220px;
 }
@@ -364,7 +365,7 @@ html, body {
 }
 .bill-sat { font-size: 16px; }
 .bill-amount {
-  font-size: 16px; font-weight: bold; color: var(--ink);
+  font-size: 16px; font-weight: 900; color: var(--ink);
   margin-left: 10px; white-space: nowrap;
   font-family: 'Noto Serif SC', 'Songti SC', serif;
 }
@@ -393,11 +394,11 @@ html, body {
   padding: 16px; margin-bottom: 12px; box-shadow: none;
 }
 .summary-card h3 {
-  font-size: 15px; color: var(--aubergine); margin-bottom: 10px; font-weight: bold;
+  font-size: 15px; color: var(--aubergine); margin-bottom: 10px; font-weight: 700;
   letter-spacing: 0.15em;
 }
 .summary-total {
-  font-size: 30px; font-weight: bold; color: var(--ink);
+  font-size: 30px; font-weight: 900; color: var(--ink);
   text-align: center; padding: 12px 0;
   font-family: 'Noto Serif SC', 'Songti SC', serif;
 }
@@ -419,7 +420,7 @@ html, body {
 }
 .top-list li:last-child { border: none; }
 .top-list .item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-list .item-amount { font-weight: bold; color: var(--ink); margin-left: 8px; font-family: 'Noto Serif SC', 'Songti SC', serif; }
+.top-list .item-amount { font-weight: 900; color: var(--ink); margin-left: 8px; font-family: 'Noto Serif SC', 'Songti SC', serif; }
 .top-list .item-sat { margin-right: 6px; }
 
 .sat-dist { display: flex; flex-direction: column; gap: 6px; }
