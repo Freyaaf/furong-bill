@@ -106,6 +106,24 @@ html, body {
   box-shadow: var(--shadow);
 }
 
+.type-toggle {
+  display: flex; margin-bottom: 12px; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--lilac); background: var(--moon-white);
+}
+.type-btn {
+  flex: 1; padding: 10px 0; border: none; background: transparent;
+  font-size: 14px; font-weight: 600; color: var(--snow-grey);
+  cursor: pointer; transition: all 0.2s;
+}
+.type-btn.selected[data-type="expense"] {
+  background: var(--indigo); color: var(--paper);
+}
+.type-btn.selected[data-type="income"] {
+  background: #2A9D5C; color: var(--paper);
+}
+.hidden { display: none !important; }
+.income-item { border-left: 3px solid #2A9D5C; }
+
 /* ===== Form ===== */
 .form-group { margin-bottom: 18px; }
 .form-group label {

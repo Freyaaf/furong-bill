@@ -65,6 +65,10 @@
       <!-- 记账 -->
       <section id="tab-add" class="tab-content active">
         <div class="greeting-card" id="greeting-card"></div>
+        <div class="type-toggle" id="type-toggle">
+          <button type="button" class="type-btn selected" data-type="expense">支出</button>
+          <button type="button" class="type-btn" data-type="income">收入</button>
+        </div>
         <form id="add-form" class="card">
           <div class="form-group">
             <label for="bill-date">日期</label>
@@ -104,13 +108,17 @@
             <label>类别</label>
             <div class="chips" id="category-chips"></div>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="satisfaction-group">
             <label>满足感</label>
             <div class="satisfaction-bar" id="satisfaction-bar"></div>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="reason-group">
             <label for="bill-reason">原因说明 <span class="text-muted">选填</span></label>
             <textarea id="bill-reason" rows="2" placeholder="为什么满足/不满足？随便写写"></textarea>
+          </div>
+          <div class="form-group hidden" id="income-note-group">
+            <label for="bill-reason-income">备注 <span class="text-muted">选填</span></label>
+            <textarea id="bill-reason-income" rows="2" placeholder="来源说明"></textarea>
           </div>
           <button type="submit" class="btn-primary" id="submit-btn">记一笔 ✨</button>
         </form>
