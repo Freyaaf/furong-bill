@@ -2,9 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>傅副官的账本</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260427">
   <link rel="manifest" href="manifest.json?v=2">
   <meta name="theme-color" content="#e07c5a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -213,6 +215,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js"></script>
+  <script>
+  // 自动缓存刷新：用当前小时做版本号，保证每小时最多拉一次新代码
+  (function(){
+    var s = document.createElement('script');
+    s.src = 'app.js?v=' + new Date().toISOString().slice(0,13);
+    document.body.appendChild(s);
+  })();
+  </script>
 </body>
 </html>
