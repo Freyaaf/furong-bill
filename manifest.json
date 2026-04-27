@@ -1,0 +1,16 @@
+{
+  "name": "傅副官的账本",
+  "short_name": "傅副官的账本",
+  "description": "记录每一笔消费和满足感",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f9f5f2",
+  "theme_color": "#e07c5a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📒</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
