@@ -28,7 +28,10 @@ const SATISFACTIONS = [
 ];
 
 function satEmoji(name) {
-  return SATISFACTIONS.find(s => s.name === name)?.emoji || '😶';
+  const s = SATISFACTIONS.find(s => s.name === name);
+  const color = s?.color || '#9e9e9e';
+  const label = s?.short || name || '无感';
+  return `<span style="color:${color};font-size:12px;font-weight:600">${label}</span>`;
 }
 function satColor(name) {
   return SATISFACTIONS.find(s => s.name === name)?.color || '#9e9e9e';
