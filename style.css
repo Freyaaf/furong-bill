@@ -56,7 +56,7 @@ html, body {
   z-index: 100;
 }
 .app-header h1 {
-  font-size: 17px; font-weight: normal;
+  font-size: 17px; font-weight: bold;
   color: var(--aubergine); letter-spacing: 0.25em;
 }
 
@@ -97,7 +97,7 @@ html, body {
   font-family: inherit;
 }
 .nav-btn.active { color: var(--aubergine); }
-.nav-icon { font-size: 20px; }
+.nav-icon { font-size: 18px; font-weight: bold; color: inherit; }
 .nav-label { font-size: 11px; font-weight: normal; letter-spacing: 0.15em; }
 
 /* ===== Card ===== */
@@ -131,7 +131,7 @@ html, body {
 /* ===== Form ===== */
 .form-group { margin-bottom: 18px; }
 .form-group label {
-  display: block; font-size: 13px; font-weight: normal;
+  display: block; font-size: 13px; font-weight: bold;
   color: var(--aubergine); margin-bottom: 6px;
   letter-spacing: 0.1em;
 }
@@ -187,7 +187,7 @@ html, body {
   background: rgba(92,78,110,0.82);
   color: var(--moon-white);
   border: none; border-radius: var(--radius);
-  font-size: 15px; font-weight: normal; letter-spacing: 0.2em;
+  font-size: 15px; font-weight: bold; letter-spacing: 0.2em;
   cursor: pointer; transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(92,78,110,0.15);
   font-family: inherit;
@@ -291,7 +291,7 @@ html, body {
 }
 .month-arrow:active { background: var(--lotus-root); }
 .month-label {
-  font-size: 16px; font-weight: normal; min-width: 120px;
+  font-size: 16px; font-weight: bold; min-width: 120px;
   text-align: center; color: var(--aubergine);
   letter-spacing: 0.15em;
 }
@@ -304,7 +304,7 @@ html, body {
   display: flex; justify-content: space-between; align-items: center;
   font-size: 14px;
 }
-.month-summary-bar .total { font-weight: normal; color: var(--aubergine); font-size: 17px; }
+.month-summary-bar .total { font-weight: bold; color: var(--aubergine); font-size: 17px; }
 .month-summary-bar .count { color: var(--snow-grey); }
 .bills-filter { margin-bottom: 10px; }
 .filter-chips {
@@ -331,7 +331,7 @@ html, body {
 /* ===== Bills List ===== */
 .date-group { margin-bottom: 16px; }
 .date-header {
-  font-size: 13px; font-weight: normal; color: var(--grape);
+  font-size: 13px; font-weight: bold; color: var(--grape);
   padding: 4px 0; margin-bottom: 6px;
   border-bottom: 1px solid var(--lotus-root);
   letter-spacing: 0.1em;
@@ -349,7 +349,7 @@ html, body {
 }
 .bill-left { flex: 1; min-width: 0; }
 .bill-name {
-  font-size: 15px; font-weight: normal; color: var(--ink);
+  font-size: 15px; font-weight: 500; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 220px;
 }
@@ -364,7 +364,7 @@ html, body {
 }
 .bill-sat { font-size: 16px; }
 .bill-amount {
-  font-size: 15px; font-weight: normal; color: var(--aubergine);
+  font-size: 15px; font-weight: bold; color: var(--aubergine);
   margin-left: 10px; white-space: nowrap;
   font-family: 'Songti SC', 'STSong', '宋体', serif;
 }
@@ -393,11 +393,11 @@ html, body {
   padding: 16px; margin-bottom: 12px; box-shadow: none;
 }
 .summary-card h3 {
-  font-size: 14px; color: var(--grape); margin-bottom: 10px; font-weight: normal;
+  font-size: 14px; color: var(--grape); margin-bottom: 10px; font-weight: bold;
   letter-spacing: 0.15em;
 }
 .summary-total {
-  font-size: 28px; font-weight: normal; color: var(--aubergine);
+  font-size: 28px; font-weight: bold; color: var(--aubergine);
   text-align: center; padding: 12px 0;
   font-family: 'Songti SC', 'STSong', '宋体', serif;
 }
@@ -419,7 +419,7 @@ html, body {
 }
 .top-list li:last-child { border: none; }
 .top-list .item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-list .item-amount { font-weight: normal; color: var(--aubergine); margin-left: 8px; font-family: 'Songti SC', 'STSong', '宋体', serif; }
+.top-list .item-amount { font-weight: bold; color: var(--aubergine); margin-left: 8px; font-family: 'Songti SC', 'STSong', '宋体', serif; }
 .top-list .item-sat { margin-right: 6px; }
 
 .sat-dist { display: flex; flex-direction: column; gap: 6px; }
@@ -523,7 +523,7 @@ html, body {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
-.modal h3 { font-size: 16px; margin-bottom: 16px; color: var(--aubergine); font-weight: normal; letter-spacing: 0.15em; }
+.modal h3 { font-size: 16px; margin-bottom: 16px; color: var(--aubergine); font-weight: bold; letter-spacing: 0.15em; }
 .modal .form-group { margin-bottom: 14px; }
 .modal-actions {
   display: flex; gap: 10px; margin-top: 16px;

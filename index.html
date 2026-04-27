@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>傅副官的账本</title>
-  <link rel="stylesheet" href="style.css?v=20260427b">
+  <link rel="stylesheet" href="style.css?v=20260427c">
   <link rel="manifest" href="manifest.json?v=2">
   <meta name="theme-color" content="#F5F0F7">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +27,11 @@
       box-shadow: 0 2px 12px rgba(92,78,110,.06);
       max-width: 300px; width: 88%;
     }
-    .lock-box .icon { font-size: 42px; margin-bottom: 12px; }
+    .lock-box .icon {
+      font-size: 28px; margin-bottom: 12px;
+      color: var(--aubergine, #5C4E6E); letter-spacing: 0.3em;
+      font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+    }
     .lock-box h2 {
       font-size: 18px; color: #5C4E6E; margin-bottom: 6px;
       font-weight: normal; letter-spacing: 0.25em;
@@ -62,7 +66,7 @@
 <body>
   <div id="lock-screen">
     <div class="lock-box">
-      <div class="icon">📒</div>
+      <div class="icon">账</div>
       <h2>傅副官的账本</h2>
       <p class="hint">花了什么，让我看看。</p>
       <input type="email" id="lock-email" placeholder="邮箱" autofocus>
@@ -74,7 +78,7 @@
 
   <div id="app">
     <header class="app-header">
-      <h1>📒 傅副官的账本</h1>
+      <h1>傅副官的账本</h1>
     </header>
 
     <main class="app-main">
@@ -136,7 +140,7 @@
             <label for="bill-reason-income">备注 <span class="text-muted">选填</span></label>
             <textarea id="bill-reason-income" rows="2" placeholder="来源说明"></textarea>
           </div>
-          <button type="submit" class="btn-primary" id="submit-btn">记一笔 ✨</button>
+          <button type="submit" class="btn-primary" id="submit-btn">记一笔</button>
         </form>
       </section>
 
@@ -165,7 +169,7 @@
       <!-- 搜索 -->
       <section id="tab-search" class="tab-content">
         <div class="search-box">
-          <input type="text" id="search-input" placeholder="🔍 搜索物品、原因...">
+          <input type="text" id="search-input" placeholder="搜索物品、原因...">
         </div>
         <div class="search-filters">
           <select id="search-category">
@@ -197,30 +201,30 @@
         <div class="card" style="margin-top:12px">
           <h3>数据导出</h3>
           <p style="font-size:13px;color:var(--snow-grey);margin-bottom:12px">导出所有账单记录为 Excel 文件</p>
-          <button type="button" class="btn-primary" id="export-btn">📥 导出Excel</button>
+          <button type="button" class="btn-primary" id="export-btn">导出 Excel</button>
         </div>
       </section>
     </main>
 
     <nav class="app-nav">
       <button class="nav-btn active" data-tab="add">
-        <span class="nav-icon">✏️</span>
+        <span class="nav-icon">记</span>
         <span class="nav-label">记账</span>
       </button>
       <button class="nav-btn" data-tab="bills">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon">册</span>
         <span class="nav-label">账单</span>
       </button>
       <button class="nav-btn" data-tab="summary">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon">览</span>
         <span class="nav-label">总结</span>
       </button>
       <button class="nav-btn" data-tab="search">
-        <span class="nav-icon">🔍</span>
+        <span class="nav-icon">寻</span>
         <span class="nav-label">搜索</span>
       </button>
       <button class="nav-btn" data-tab="budget">
-        <span class="nav-icon">💰</span>
+        <span class="nav-icon">算</span>
         <span class="nav-label">预算</span>
       </button>
     </nav>

@@ -3,44 +3,44 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const EXPENSE_CATEGORIES = [
-  { name: '食物', emoji: '🍜' },
-  { name: '住房日用', emoji: '🏠' },
-  { name: '交通通信', emoji: '🚇' },
-  { name: '外貌', emoji: '💄' },
-  { name: '衣服', emoji: '👗' },
-  { name: '文娱运动', emoji: '🎮' },
-  { name: '旅行', emoji: '✈️' },
-  { name: '社交', emoji: '👥' },
-  { name: '医疗', emoji: '💊' },
-  { name: '梦想礼物', emoji: '🎁' },
-  { name: '学习', emoji: '📚' },
-  { name: 'guilty pleasure', emoji: '🍰' },
+  { name: '食物', emoji: '' },
+  { name: '住房日用', emoji: '' },
+  { name: '交通通信', emoji: '' },
+  { name: '外貌', emoji: '' },
+  { name: '衣服', emoji: '' },
+  { name: '文娱运动', emoji: '' },
+  { name: '旅行', emoji: '' },
+  { name: '社交', emoji: '' },
+  { name: '医疗', emoji: '' },
+  { name: '梦想礼物', emoji: '' },
+  { name: '学习', emoji: '' },
+  { name: 'guilty pleasure', emoji: '' },
 ];
 
 const INCOME_CATEGORIES = [
-  { name: '工资', emoji: '💼' },
-  { name: '生活费', emoji: '🏡' },
-  { name: '劳务', emoji: '📝' },
-  { name: '红包', emoji: '🧧' },
-  { name: '年终奖', emoji: '🎉' },
-  { name: '报销', emoji: '🧾' },
-  { name: '兼职', emoji: '💪' },
-  { name: '出闲置', emoji: '♻️' },
-  { name: '利息', emoji: '🏦' },
-  { name: '理财收益', emoji: '📈' },
-  { name: '其他收入', emoji: '💫' },
+  { name: '工资', emoji: '' },
+  { name: '生活费', emoji: '' },
+  { name: '劳务', emoji: '' },
+  { name: '红包', emoji: '' },
+  { name: '年终奖', emoji: '' },
+  { name: '报销', emoji: '' },
+  { name: '兼职', emoji: '' },
+  { name: '出闲置', emoji: '' },
+  { name: '利息', emoji: '' },
+  { name: '理财收益', emoji: '' },
+  { name: '其他收入', emoji: '' },
 ];
 
 const CATEGORIES = EXPENSE_CATEGORIES;
 
 const SATISFACTIONS = [
-  { name: '非常满足', emoji: '🥰', color: '#7B2D8E', short: '非常满足' },
-  { name: '比较满足', emoji: '😊', color: '#2E6BC5', short: '比较满足' },
-  { name: '一般满足', emoji: '🙂', color: '#2A9D5C', short: '一般满足' },
-  { name: '无感', emoji: '😶', color: '#9e9e9e', short: '无感' },
-  { name: '比较不满', emoji: '😕', color: '#E08A2B', short: '比较不满' },
-  { name: '非常不满', emoji: '😤', color: '#D42B2B', short: '非常不满' },
-  { name: '待补充', emoji: '⏳', color: '#9e9e9e', short: '待补充' },
+  { name: '非常满足', emoji: '', color: '#7B2D8E', short: '非常满足' },
+  { name: '比较满足', emoji: '', color: '#2E6BC5', short: '比较满足' },
+  { name: '一般满足', emoji: '', color: '#2A9D5C', short: '一般满足' },
+  { name: '无感', emoji: '', color: '#9e9e9e', short: '无感' },
+  { name: '比较不满', emoji: '', color: '#E08A2B', short: '比较不满' },
+  { name: '非常不满', emoji: '', color: '#D42B2B', short: '非常不满' },
+  { name: '待补充', emoji: '', color: '#9e9e9e', short: '待补充' },
 ];
 
 function satEmoji(name) {
@@ -53,8 +53,7 @@ function satColor(name) {
   return SATISFACTIONS.find(s => s.name === name)?.color || '#9e9e9e';
 }
 function catEmoji(name) {
-  return EXPENSE_CATEGORIES.find(c => c.name === name)?.emoji
-    || INCOME_CATEGORIES.find(c => c.name === name)?.emoji || '📦';
+  return '';
 }
 
 let state = {
@@ -270,7 +269,7 @@ function getAddResponse(item, amount, category, satisfaction) {
     return r[Math.floor(Math.random() * r.length)];
   }
   if (item.includes('玉米')) {
-    const r = ['又是玉米！你的最爱', '玉米小姐今天也吃玉米了', '记好了，今日份玉米 ✓'];
+    const r = ['又是玉米！你的最爱', '玉米小姐今天也吃玉米了', '记好了，今日份玉米'];
     return r[Math.floor(Math.random() * r.length)];
   }
   if (satisfaction === '待补充') {
@@ -289,7 +288,7 @@ function getAddResponse(item, amount, category, satisfaction) {
     const r = ['大额支出！帮你记好了', '这笔不小哦，记下了', '大手笔，记录在案'];
     return r[Math.floor(Math.random() * r.length)];
   }
-  const r = ['记好了～', '记下了 ✨', '好的，记上了', '收到，已记录'];
+  const r = ['记好了', '记下了', '好的，记上了', '收到，已记录'];
   return r[Math.floor(Math.random() * r.length)];
 }
 
@@ -406,14 +405,14 @@ function switchAddType(type) {
   const cats = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const chipsEl = document.getElementById('category-chips');
   chipsEl.innerHTML = cats.map(c =>
-    `<div class="chip" data-cat="${c.name}">${c.emoji} ${c.name}</div>`
+    `<div class="chip" data-cat="${c.name}">${c.name}</div>`
   ).join('');
   const isIncome = type === 'income';
   document.getElementById('satisfaction-group').classList.toggle('hidden', isIncome);
   document.getElementById('reason-group').classList.toggle('hidden', isIncome);
   document.getElementById('income-note-group').classList.toggle('hidden', !isIncome);
   document.getElementById('bill-item').placeholder = isIncome ? '收入来源' : '吃了什么 / 买了什么';
-  document.getElementById('submit-btn').textContent = isIncome ? '记一笔收入 💰' : '记一笔 ✨';
+  document.getElementById('submit-btn').textContent = isIncome ? '记一笔收入' : '记一笔';
 }
 
 function initAddForm() {
@@ -429,7 +428,7 @@ function initAddForm() {
 
   const chipsEl = document.getElementById('category-chips');
   chipsEl.innerHTML = EXPENSE_CATEGORIES.map(c =>
-    `<div class="chip" data-cat="${c.name}">${c.emoji} ${c.name}</div>`
+    `<div class="chip" data-cat="${c.name}">${c.name}</div>`
   ).join('');
   chipsEl.addEventListener('click', e => {
     const chip = e.target.closest('.chip');
@@ -442,8 +441,7 @@ function initAddForm() {
   const satEl = document.getElementById('satisfaction-bar');
   satEl.innerHTML = SATISFACTIONS.map(s =>
     `<div class="sat-option" data-sat="${s.name}">
-      <span class="sat-emoji">${s.emoji}</span>
-      <span class="sat-label">${s.short}</span>
+      <span class="sat-label" style="color:${s.color};font-weight:bold">${s.short}</span>
     </div>`
   ).join('');
   satEl.addEventListener('click', e => {
@@ -476,7 +474,7 @@ function initAddForm() {
     const ok = await insertBill(record);
     btn.disabled = false;
     if (ok) {
-      toast(isIncome ? '收入记好了 💰' : getAddResponse(item, amount, state.selectedCategory, state.selectedSatisfaction));
+      toast(isIncome ? '收入记好了' : getAddResponse(item, amount, state.selectedCategory, state.selectedSatisfaction));
       updateGreeting();
       document.getElementById('bill-item').value = '';
       document.getElementById('bill-amount').value = '';
@@ -500,7 +498,7 @@ async function loadBills() {
   const filterCats = [...EXPENSE_CATEGORIES, ...usedIncomeCats];
   filterEl.innerHTML = `<div class="filter-chips"><span class="filter-chip ${!state.billsCategory ? 'selected' : ''}" data-cat="">全部</span>${filterCats.map(c => {
     const isIncomeCat = INCOME_CATEGORIES.some(ic => ic.name === c.name);
-    return `<span class="filter-chip ${state.billsCategory === c.name ? 'selected' : ''}" data-cat="${c.name}" ${isIncomeCat ? 'style="border-color:#2A9D5C"' : ''}>${c.emoji} ${c.name}</span>`;
+    return `<span class="filter-chip ${state.billsCategory === c.name ? 'selected' : ''}" data-cat="${c.name}" ${isIncomeCat ? 'style="border-color:#2A9D5C"' : ''}>${c.name}</span>`;
   }).join('')}</div>`;
   filterEl.addEventListener('click', e => {
     const chip = e.target.closest('.filter-chip');
@@ -532,7 +530,7 @@ async function loadBills() {
   });
 
   if (bills.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🌿</div><p>${state.billsCategory ? '这个类别没有记录' : '这个月还没有记账哦'}</p></div>`;
+    list.innerHTML = `<div class="empty-state"><p>${state.billsCategory ? '这个类别没有记录' : '这个月还没有记账哦'}</p></div>`;
     return;
   }
 
@@ -599,14 +597,14 @@ function renderBillItem(b) {
       <div class="bill-left">
         <div class="bill-name">${esc(b.item)}</div>
         <div class="bill-meta">
-          <span class="bill-category-tag">${catEmoji(b.category)} ${b.category}</span>
+          <span class="bill-category-tag">${b.category}</span>
           ${!isIncome && b.satisfaction ? `<span class="bill-sat">${satEmoji(b.satisfaction)}</span>` : ''}
         </div>
       </div>
       <div class="bill-amount" style="${isIncome ? 'color:#2A9D5C' : ''}">${isIncome ? '+' : ''}¥${parseFloat(b.amount).toFixed(2)}</div>
     </div>
     <div class="bill-detail">
-      ${b.reason ? `<div class="reason">💬 ${esc(b.reason)}</div>` : ''}
+      ${b.reason ? `<div class="reason">${esc(b.reason)}</div>` : ''}
       ${hasFollowUp ? `<div class="follow-up">
         <div class="follow-up-label">追评 · ${b.follow_up_date ? formatDate(b.follow_up_date) : ''}</div>
         <div>${esc(b.follow_up)}</div>
@@ -648,7 +646,7 @@ window.saveFollowUp = async function(id) {
     follow_up_date: text ? todayDate() : null,
   });
   if (ok) {
-    toast('追评已保存 ✨');
+    toast('追评已保存');
     closeModal();
     loadBills();
   }
@@ -662,12 +660,12 @@ async function openEditModal(id) {
   const cats = isIncome ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
   const catOptions = cats.map(c =>
-    `<div class="chip ${bill.category === c.name ? 'selected' : ''}" data-cat="${c.name}">${c.emoji} ${c.name}</div>`
+    `<div class="chip ${bill.category === c.name ? 'selected' : ''}" data-cat="${c.name}">${c.name}</div>`
   ).join('');
 
   const satOptions = SATISFACTIONS.map(s =>
     `<div class="sat-option ${bill.satisfaction === s.name ? 'selected' : ''}" data-sat="${s.name}">
-      <span class="sat-emoji">${s.emoji}</span><span class="sat-label">${s.short}</span>
+      <span class="sat-label" style="color:${s.color};font-weight:bold">${s.short}</span>
     </div>`
   ).join('');
 
@@ -730,7 +728,7 @@ window.saveEdit = async function(id, isIncome) {
   if (!isIncome) updates.satisfaction = satEl.dataset.sat;
   const ok = await updateBill(id, updates);
   if (ok) {
-    toast('已更新 ✨');
+    toast('已更新');
     closeModal();
     loadBills();
   }
@@ -749,7 +747,7 @@ async function loadSummary() {
   const budgets = await fetchBudgets(ym);
 
   if (bills.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>这个月还没有数据</p></div>`;
+    container.innerHTML = `<div class="empty-state"><p>这个月还没有数据</p></div>`;
     return;
   }
 
@@ -777,7 +775,7 @@ async function loadSummary() {
     const barColor = pct > 90 ? '#A64B4B' : pct > 70 ? '#B8698A' : 'var(--indigo)';
     const remaining = totalBudget - total;
     budgetHtml = `<div class="summary-card">
-      <h3>💰 预算</h3>
+      <h3>预算</h3>
       <div class="budget-progress">
         <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
         <div class="budget-info">
@@ -805,7 +803,7 @@ async function loadSummary() {
     const pct = expenseBills.length > 0 ? (count / expenseBills.length * 100) : 0;
     if (count === 0) return '';
     return `<div class="sat-dist-row">
-      <span>${s.emoji}</span>
+      <span style="color:${s.color};font-size:12px;font-weight:bold;min-width:56px">${s.short}</span>
       <div class="sat-bar-bg"><div class="sat-bar-fill" style="width:${pct}%;background:${s.color}"></div></div>
       <span class="sat-pct">${count}笔</span>
     </div>`;
@@ -833,7 +831,7 @@ async function loadSummary() {
   if (incomeTotal > 0) {
     incomeHtml = `<div class="summary-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:14px;color:var(--aubergine);font-weight:600">💰 收支概览</span>
+        <span style="font-size:14px;color:var(--aubergine);font-weight:bold">收支概览</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px">
         <span style="color:#2A9D5C">收入 +¥${incomeTotal.toFixed(2)}</span>
@@ -862,12 +860,12 @@ async function loadSummary() {
     ${budgetHtml}
 
     <div class="summary-card">
-      <h3>📂 类别分布</h3>
+      <h3>类别分布</h3>
       <div class="chart-container"><canvas id="cat-chart"></canvas></div>
       <div style="margin-top:12px">
         ${catEntries.map(([cat, amt]) =>
           `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px">
-            <span>${catEmoji(cat)} ${cat}</span>
+            <span>${cat}</span>
             <span style="font-weight:600;color:var(--primary)">¥${amt.toFixed(2)}</span>
           </div>`
         ).join('')}
@@ -875,13 +873,13 @@ async function loadSummary() {
     </div>
 
     <div class="summary-card">
-      <h3>😊 满足感分布</h3>
+      <h3>满足感分布</h3>
       <p style="font-size:14px;color:var(--indigo);margin-bottom:10px;font-weight:600">${happyPct}% 的消费让你感到满足</p>
       <div class="sat-dist">${satDistHtml}</div>
     </div>
 
     <div class="summary-card">
-      <h3>💸 花费最多</h3>
+      <h3>花费最多</h3>
       <ul class="top-list">
         ${expensive.map(b => `<li>
           <span class="item-sat">${satEmoji(b.satisfaction)}</span>
@@ -892,7 +890,7 @@ async function loadSummary() {
     </div>
 
     ${bestBills.length ? `<div class="summary-card">
-      <h3>🌟 最值得的消费</h3>
+      <h3>最值得的消费</h3>
       <ul class="top-list">
         ${bestBills.map(b => `<li>
           <span class="item-sat">${satEmoji(b.satisfaction)}</span>
@@ -903,7 +901,7 @@ async function loadSummary() {
     </div>` : ''}
 
     ${worstBills.length ? `<div class="summary-card">
-      <h3>💔 最不值得的消费</h3>
+      <h3>最不值得的消费</h3>
       <ul class="top-list">
         ${worstBills.map(b => `<li>
           <span class="item-sat">${satEmoji(b.satisfaction)}</span>
@@ -940,15 +938,15 @@ async function loadSummary() {
 function initSearch() {
   const catSelect = document.getElementById('search-category');
   EXPENSE_CATEGORIES.forEach(c => {
-    catSelect.innerHTML += `<option value="${c.name}">${c.emoji} ${c.name}</option>`;
+    catSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
   });
   INCOME_CATEGORIES.forEach(c => {
-    catSelect.innerHTML += `<option value="${c.name}">${c.emoji} ${c.name}</option>`;
+    catSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
   });
 
   const satSelect = document.getElementById('search-satisfaction');
   SATISFACTIONS.forEach(s => {
-    satSelect.innerHTML += `<option value="${s.name}">${s.emoji} ${s.name}</option>`;
+    satSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
   });
 
   let timer;
@@ -963,7 +961,7 @@ function initSearch() {
     document.getElementById('search-results').innerHTML = '<div class="loading">搜索中...</div>';
     const results = await searchBills(query, cat, sat);
     if (results.length === 0) {
-      document.getElementById('search-results').innerHTML = '<div class="search-hint">没找到 😶</div>';
+      document.getElementById('search-results').innerHTML = '<div class="search-hint">没找到</div>';
       return;
     }
     const totalAmt = results.reduce((s, b) => s + parseFloat(b.amount), 0);
@@ -974,14 +972,14 @@ function initSearch() {
           <div class="bill-left">
             <div class="bill-name">${esc(b.item)}</div>
             <div class="bill-meta">
-              <span class="bill-category-tag">${catEmoji(b.category)} ${b.category}</span>
+              <span class="bill-category-tag">${b.category}</span>
               <span class="bill-sat">${satEmoji(b.satisfaction)}</span>
               <span style="font-size:11px;color:var(--text-muted)">${formatDate(b.date)}</span>
             </div>
           </div>
           <div class="bill-amount">¥${parseFloat(b.amount).toFixed(2)}</div>
         </div>
-        ${b.reason ? `<div style="font-size:13px;color:#666;margin-top:6px">💬 ${esc(b.reason)}</div>` : ''}
+        ${b.reason ? `<div style="font-size:13px;color:#666;margin-top:6px">${esc(b.reason)}</div>` : ''}
         ${b.follow_up ? `<div class="follow-up" style="margin-top:6px">
           <div class="follow-up-label">追评</div><div>${esc(b.follow_up)}</div>
         </div>` : ''}
@@ -1007,7 +1005,7 @@ async function loadBudgetPage() {
   catBudgets.innerHTML = '<h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-muted)">分类预算（选填）</h4>' +
     EXPENSE_CATEGORIES.map(c =>
       `<div class="budget-cat-row">
-        <span class="cat-label">${c.emoji} ${c.name}</span>
+        <span class="cat-label">${c.name}</span>
         <input type="number" step="1" min="0" placeholder="不限" data-cat="${c.name}" class="budget-cat-input">
       </div>`
     ).join('');
@@ -1056,7 +1054,7 @@ async function loadBudgetPage() {
         const barColor = pct > 90 ? '#A64B4B' : pct > 70 ? '#B8698A' : 'var(--indigo)';
         statusHtml += `<div style="margin-bottom:8px">
           <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-            <span>${catEmoji(b.category)} ${b.category}</span>
+            <span>${b.category}</span>
             <span>¥${spent.toFixed(2)} / ¥${b.budget_amount}</span>
           </div>
           <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
@@ -1079,7 +1077,7 @@ document.getElementById('save-budget-btn').addEventListener('click', async () =>
     const val = parseFloat(input.value) || 0;
     await upsertBudget(ym, input.dataset.cat, val);
   }
-  toast('预算已保存 ✨');
+  toast('预算已保存');
   loadBudgetPage();
 });
 
@@ -1110,7 +1108,7 @@ document.getElementById('export-btn').addEventListener('click', async () => {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '账单');
   XLSX.writeFile(wb, `傅副官的账本_${todayDate()}.xlsx`);
-  toast('导出成功 ✨');
+  toast('导出成功');
 });
 
 // ===== Event Bindings =====
