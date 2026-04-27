@@ -440,9 +440,8 @@ async function loadBills() {
 
   // 类别筛选条
   const filterEl = document.getElementById('bills-filter');
-  const usedCats = [...new Set(allBills.map(b => b.category))];
-  filterEl.innerHTML = `<div class="filter-chips"><span class="filter-chip ${!state.billsCategory ? 'selected' : ''}" data-cat="">全部</span>${usedCats.map(c =>
-    `<span class="filter-chip ${state.billsCategory === c ? 'selected' : ''}" data-cat="${c}">${catEmoji(c)} ${c}</span>`
+  filterEl.innerHTML = `<div class="filter-chips"><span class="filter-chip ${!state.billsCategory ? 'selected' : ''}" data-cat="">全部</span>${CATEGORIES.map(c =>
+    `<span class="filter-chip ${state.billsCategory === c.name ? 'selected' : ''}" data-cat="${c.name}">${c.emoji} ${c.name}</span>`
   ).join('')}</div>`;
   filterEl.addEventListener('click', e => {
     const chip = e.target.closest('.filter-chip');
