@@ -18,13 +18,13 @@ const CATEGORIES = [
 ];
 
 const SATISFACTIONS = [
-  { name: '非常满足', emoji: '🥰', color: '#4caf50', short: '非常满足' },
-  { name: '比较满足', emoji: '😊', color: '#8bc34a', short: '比较满足' },
-  { name: '一般满足', emoji: '🙂', color: '#cddc39', short: '一般满足' },
+  { name: '非常满足', emoji: '🥰', color: '#7B2D8E', short: '非常满足' },
+  { name: '比较满足', emoji: '😊', color: '#2E6BC5', short: '比较满足' },
+  { name: '一般满足', emoji: '🙂', color: '#2A9D5C', short: '一般满足' },
   { name: '无感', emoji: '😶', color: '#9e9e9e', short: '无感' },
-  { name: '比较不满', emoji: '😕', color: '#ff9800', short: '比较不满' },
-  { name: '非常不满', emoji: '😤', color: '#f44336', short: '非常不满' },
-  { name: '待补充', emoji: '⏳', color: '#b0a4c8', short: '待补充' },
+  { name: '比较不满', emoji: '😕', color: '#E08A2B', short: '比较不满' },
+  { name: '非常不满', emoji: '😤', color: '#D42B2B', short: '非常不满' },
+  { name: '待补充', emoji: '⏳', color: '#9e9e9e', short: '待补充' },
 ];
 
 function satEmoji(name) {
