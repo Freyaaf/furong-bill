@@ -45,6 +45,7 @@ let state = {
   selectedCategory: null,
   selectedSatisfaction: null,
   editingId: null,
+  billsSort: 'desc',
 };
 
 let chartInstance = null;
@@ -398,8 +399,13 @@ async function loadBills() {
   const totalBudget = budgets.find(b => b.category === '')?.budget_amount;
   const total = bills.reduce((s, b) => s + parseFloat(b.amount), 0);
 
-  let summaryHtml = `<span class="count">${bills.length} 笔</span><span class="total">¥${total.toFixed(2)}</span>`;
+  const sortLabel = state.billsSort === 'desc' ? '新→旧' : '旧→新';
+  let summaryHtml = `<span class="count">${bills.length} 笔</span><span class="total">¥${total.toFixed(2)}</span><button class="sort-toggle" id="sort-toggle">${sortLabel} ↕</button>`;
   document.getElementById('bills-summary-bar').innerHTML = summaryHtml;
+  document.getElementById('sort-toggle').addEventListener('click', () => {
+    state.billsSort = state.billsSort === 'desc' ? 'asc' : 'desc';
+    loadBills();
+  });
 
   if (bills.length === 0) {
     list.innerHTML = `<div class="empty-state"><div class="empty-icon">🌿</div><p>这个月还没有记账哦</p></div>`;
@@ -412,8 +418,12 @@ async function loadBills() {
     grouped[b.date].push(b);
   });
 
+  const sortedDates = Object.keys(grouped).sort((a, b) =>
+    state.billsSort === 'desc' ? b.localeCompare(a) : a.localeCompare(b)
+  );
   let html = '';
-  for (const [date, items] of Object.entries(grouped)) {
+  for (const date of sortedDates) {
+    const items = grouped[date];
     const dayTotal = items.reduce((s, b) => s + parseFloat(b.amount), 0);
     html += `<div class="date-group">
       <div class="date-header">${formatDate(date)} ${weekday(date)} · ¥${dayTotal.toFixed(2)}</div>`;

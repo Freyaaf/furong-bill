@@ -253,6 +253,12 @@ html, body {
 }
 .month-summary-bar .total { font-weight: 700; color: var(--aubergine); font-size: 18px; }
 .month-summary-bar .count { color: var(--snow-grey); }
+.sort-toggle {
+  background: var(--mist); border: 1px solid var(--lilac); border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; color: var(--indigo);
+  cursor: pointer; white-space: nowrap;
+}
+.sort-toggle:active { background: var(--lilac); }
 
 /* ===== Bills List ===== */
 .date-group { margin-bottom: 16px; }
