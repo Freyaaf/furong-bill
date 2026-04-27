@@ -556,7 +556,7 @@ async function openEditModal(id) {
       <input type="text" id="edit-item" value="${esc(bill.item)}">
     </div>
     <div class="form-group"><label>金额</label>
-      <input type="number" id="edit-amount" step="0.01" value="${bill.amount}">
+      <input type="text" id="edit-amount" inputmode="decimal" pattern="[0-9]*\\.?[0-9]*" value="${bill.amount}">
     </div>
     <div class="form-group"><label>类别</label>
       <div class="chips" id="edit-cats">${catOptions}</div>
