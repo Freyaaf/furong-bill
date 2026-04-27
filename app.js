@@ -24,6 +24,7 @@ const SATISFACTIONS = [
   { name: '无感', emoji: '😶', color: '#9e9e9e', short: '无感' },
   { name: '比较不满', emoji: '😕', color: '#ff9800', short: '比较不满' },
   { name: '非常不满', emoji: '😤', color: '#f44336', short: '非常不满' },
+  { name: '待补充', emoji: '⏳', color: '#b0a4c8', short: '待补充' },
 ];
 
 function satEmoji(name) {
@@ -243,6 +244,10 @@ function getAddResponse(item, amount, category, satisfaction) {
     const r = ['又是玉米！你的最爱', '玉米小姐今天也吃玉米了', '记好了，今日份玉米 ✓'];
     return r[Math.floor(Math.random() * r.length)];
   }
+  if (satisfaction === '待补充') {
+    const r = ['先记着，到了再评价～', '好，等你收货了来打分', '记下了，满足感回头补上'];
+    return r[Math.floor(Math.random() * r.length)];
+  }
   if (satisfaction === '非常不满') {
     const r = ['这笔花得不开心啊，记住下次避开', '心疼你的钱包，也心疼你', '不值就不值，踩坑记录 +1'];
     return r[Math.floor(Math.random() * r.length)];
@@ -265,9 +270,10 @@ function generateReview(bills, prevBills, budgets) {
   const prevTotal = prevBills.reduce((s, b) => s + parseFloat(b.amount), 0);
   const gpBills = bills.filter(b => b.category === 'guilty pleasure');
   const gpTotal = gpBills.reduce((s, b) => s + parseFloat(b.amount), 0);
-  const happyCount = bills.filter(b => ['非常满足','比较满足','一般满足'].includes(b.satisfaction)).length;
-  const happyPct = Math.round(happyCount / bills.length * 100);
-  const sadBills = bills.filter(b => ['比较不满','非常不满'].includes(b.satisfaction));
+  const ratedBills = bills.filter(b => b.satisfaction !== '待补充');
+  const happyCount = ratedBills.filter(b => ['非常满足','比较满足','一般满足'].includes(b.satisfaction)).length;
+  const happyPct = ratedBills.length > 0 ? Math.round(happyCount / ratedBills.length * 100) : 0;
+  const sadBills = ratedBills.filter(b => ['比较不满','非常不满'].includes(b.satisfaction));
   const totalBudget = budgets.find(b => b.category === '')?.budget_amount;
 
   let lines = [];
@@ -659,12 +665,13 @@ async function loadSummary() {
   }).join('');
 
   // 满足感得分
-  const satScore = { '非常满足': 3, '比较满足': 2, '一般满足': 1, '一般': 0, '无感': 0, '比较不满': -1, '非常不满': -2 };
-  const happyCount = bills.filter(b => ['非常满足','比较满足','一般满足'].includes(b.satisfaction)).length;
-  const happyPct = (happyCount / bills.length * 100).toFixed(0);
+  const satScore = { '非常满足': 3, '比较满足': 2, '一般满足': 1, '一般': 0, '无感': 0, '比较不满': -1, '非常不满': -2, '待补充': null };
+  const ratedBills = bills.filter(b => b.satisfaction !== '待补充');
+  const happyCount = ratedBills.filter(b => ['非常满足','比较满足','一般满足'].includes(b.satisfaction)).length;
+  const happyPct = ratedBills.length > 0 ? (happyCount / ratedBills.length * 100).toFixed(0) : 0;
 
-  // 最值得 & 最不值得
-  const sorted = [...bills].sort((a, b) => {
+  // 最值得 & 最不值得（排除待补充）
+  const sorted = [...ratedBills].sort((a, b) => {
     const sa = satScore[a.satisfaction] ?? 0;
     const sb2 = satScore[b.satisfaction] ?? 0;
     return sb2 - sa || parseFloat(b.amount) - parseFloat(a.amount);
