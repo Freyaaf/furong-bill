@@ -30,7 +30,7 @@
 
 html, body {
   height: 100%;
-  font-family: 'Songti SC', 'STSong', '宋体', 'Kaiti SC', 'STKaiti', '楷体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
   font-size: 16px;
   color: var(--text);
   line-height: 1.8;
@@ -167,7 +167,7 @@ html, body {
   border: none; background: var(--paper); color: var(--ink);
   cursor: pointer; text-align: center;
   border-right: 1px solid var(--lotus-root); border-bottom: 1px solid var(--lotus-root);
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
   transition: background 0.2s;
 }
 .numpad-row:last-child .numpad-key { border-bottom: none; }
@@ -366,7 +366,7 @@ html, body {
 .bill-amount {
   font-size: 16px; font-weight: bold; color: var(--ink);
   margin-left: 10px; white-space: nowrap;
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
 }
 .bill-detail {
   margin-top: 8px; padding-top: 8px;
@@ -399,7 +399,7 @@ html, body {
 .summary-total {
   font-size: 30px; font-weight: bold; color: var(--ink);
   text-align: center; padding: 12px 0;
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
 }
 .summary-total .unit { font-size: 15px; font-weight: normal; color: var(--aubergine); }
 .summary-compare {
@@ -419,7 +419,7 @@ html, body {
 }
 .top-list li:last-child { border: none; }
 .top-list .item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-list .item-amount { font-weight: bold; color: var(--ink); margin-left: 8px; font-family: 'Songti SC', 'STSong', '宋体', serif; }
+.top-list .item-amount { font-weight: bold; color: var(--ink); margin-left: 8px; font-family: 'Noto Serif SC', 'Songti SC', serif; }
 .top-list .item-sat { margin-right: 6px; }
 
 .sat-dist { display: flex; flex-direction: column; gap: 6px; }
