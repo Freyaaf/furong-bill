@@ -49,6 +49,7 @@ let state = {
   selectedSatisfaction: null,
   editingId: null,
   billsSort: 'desc',
+  billsCategory: '',
 };
 
 let chartInstance = null;
@@ -435,7 +436,22 @@ async function loadBills() {
   label.textContent = formatYM(state.billsMonth);
   const list = document.getElementById('bills-list');
   list.innerHTML = '<div class="loading">加载中...</div>';
-  const bills = await fetchBills(state.billsMonth);
+  const allBills = await fetchBills(state.billsMonth);
+
+  // 类别筛选条
+  const filterEl = document.getElementById('bills-filter');
+  const usedCats = [...new Set(allBills.map(b => b.category))];
+  filterEl.innerHTML = `<div class="filter-chips"><span class="filter-chip ${!state.billsCategory ? 'selected' : ''}" data-cat="">全部</span>${usedCats.map(c =>
+    `<span class="filter-chip ${state.billsCategory === c ? 'selected' : ''}" data-cat="${c}">${catEmoji(c)} ${c}</span>`
+  ).join('')}</div>`;
+  filterEl.addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip) return;
+    state.billsCategory = chip.dataset.cat;
+    loadBills();
+  });
+
+  const bills = state.billsCategory ? allBills.filter(b => b.category === state.billsCategory) : allBills;
 
   const budgets = await fetchBudgets(state.billsMonth);
   const totalBudget = budgets.find(b => b.category === '')?.budget_amount;
@@ -450,7 +466,7 @@ async function loadBills() {
   });
 
   if (bills.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🌿</div><p>这个月还没有记账哦</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🌿</div><p>${state.billsCategory ? '这个类别没有记录' : '这个月还没有记账哦'}</p></div>`;
     return;
   }
 

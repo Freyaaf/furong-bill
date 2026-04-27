@@ -276,6 +276,19 @@ html, body {
 }
 .month-summary-bar .total { font-weight: 700; color: var(--aubergine); font-size: 18px; }
 .month-summary-bar .count { color: var(--snow-grey); }
+.bills-filter { margin-bottom: 10px; }
+.filter-chips {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 5px 12px; border-radius: 16px; font-size: 12px;
+  background: var(--moon-white); border: 1px solid var(--lilac);
+  color: var(--snow-grey); cursor: pointer; white-space: nowrap;
+}
+.filter-chip.selected {
+  background: var(--indigo); color: var(--paper); border-color: var(--indigo);
+}
+
 .sort-toggle {
   background: var(--mist); border: 1px solid var(--lilac); border-radius: 6px;
   padding: 4px 10px; font-size: 12px; color: var(--indigo);
