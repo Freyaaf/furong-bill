@@ -6,9 +6,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>傅副官的账本</title>
-  <link rel="stylesheet" href="style.css?v=20260427">
+  <link rel="stylesheet" href="style.css?v=20260427b">
   <link rel="manifest" href="manifest.json?v=2">
-  <meta name="theme-color" content="#e07c5a">
+  <meta name="theme-color" content="#F5F0F7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
@@ -22,27 +22,41 @@
     }
     #lock-screen.hidden { display: none; }
     .lock-box {
-      background: #FAF6F0; border: 1px solid #D9C9E0; border-radius: 16px;
+      background: #FAF6F0; border: 1px solid #E8E1EC; border-radius: 4px;
       padding: 40px 28px; text-align: center;
-      box-shadow: 0 4px 20px rgba(92,78,110,.1);
+      box-shadow: 0 2px 12px rgba(92,78,110,.06);
       max-width: 300px; width: 88%;
     }
-    .lock-box .icon { font-size: 48px; margin-bottom: 12px; }
-    .lock-box h2 { font-size: 18px; color: #5C4E6E; margin-bottom: 6px; }
-    .lock-box .hint { font-size: 13px; color: #A896B8; margin-bottom: 24px; }
+    .lock-box .icon { font-size: 42px; margin-bottom: 12px; }
+    .lock-box h2 {
+      font-size: 18px; color: #5C4E6E; margin-bottom: 6px;
+      font-weight: normal; letter-spacing: 0.25em;
+      font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+    }
+    .lock-box .hint {
+      font-size: 13px; color: #A896B8; margin-bottom: 24px;
+      font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+      letter-spacing: 0.1em;
+    }
     .lock-box input[type="email"],
     .lock-box input[type="password"] {
-      width: 100%; padding: 12px; border: 1.5px solid #D9C9E0; border-radius: 8px;
+      width: 100%; padding: 12px; border: 1px solid #D9C9E0; border-radius: 4px;
       font-size: 15px; text-align: center; outline: none; background: #F5F0F7; color: #3D3450;
+      font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
     }
-    .lock-box input:focus { border-color: #8E7AA8; box-shadow: 0 0 0 3px rgba(142,122,168,.12); }
+    .lock-box input:focus { border-color: #A896B8; box-shadow: 0 0 0 2px rgba(168,150,184,.12); }
     .lock-box button {
       width: 100%; margin-top: 14px; padding: 12px;
-      background: linear-gradient(135deg, #8E7AA8, #5C4E6E); color: #F5F0F7;
-      border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
-      cursor: pointer; box-shadow: 0 3px 12px rgba(92,78,110,.2);
+      background: rgba(92,78,110,0.82); color: #F5F0F7;
+      border: none; border-radius: 4px; font-size: 15px; font-weight: normal;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(92,78,110,.15);
+      font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+      letter-spacing: 0.2em;
     }
-    .lock-box .err { color: #A64B4B; font-size: 13px; margin-top: 10px; display: none; }
+    .lock-box .err {
+      color: #A64B4B; font-size: 13px; margin-top: 10px; display: none;
+      font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+    }
   </style>
 </head>
 <body>
