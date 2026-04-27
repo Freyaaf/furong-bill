@@ -30,7 +30,8 @@
     .lock-box .icon { font-size: 48px; margin-bottom: 12px; }
     .lock-box h2 { font-size: 18px; color: #5C4E6E; margin-bottom: 6px; }
     .lock-box .hint { font-size: 13px; color: #A896B8; margin-bottom: 24px; }
-    .lock-box input {
+    .lock-box input[type="email"],
+    .lock-box input[type="password"] {
       width: 100%; padding: 12px; border: 1.5px solid #D9C9E0; border-radius: 8px;
       font-size: 15px; text-align: center; outline: none; background: #F5F0F7; color: #3D3450;
     }
@@ -50,7 +51,8 @@
       <div class="icon">📒</div>
       <h2>傅副官的账本</h2>
       <p class="hint">花了什么，让我看看。</p>
-      <input type="password" id="lock-pw" placeholder="口令" autofocus>
+      <input type="email" id="lock-email" placeholder="邮箱" autofocus>
+      <input type="password" id="lock-pw" placeholder="密码" style="margin-top:10px">
       <button id="lock-btn">开门</button>
       <p class="err" id="lock-err">不对，再想想？</p>
     </div>
@@ -218,22 +220,36 @@
     <div class="modal" id="modal"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
   (function() {
-    var PASS = 'furong';
-    var KEY = 'bill_auth_ok';
-    if (localStorage.getItem(KEY) === '1') {
-      document.getElementById('lock-screen').classList.add('hidden');
-      return;
-    }
+    var SB_URL = 'https://otpcdlgwlaifirhfnnat.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGNkbGd3bGFpZmlyaGZubmF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4ODQ5NzQsImV4cCI6MjA5MTQ2MDk3NH0.nC92brW3QJPbkh9IQ8q3-S6W-Mw8WLtcKXoIJ-8xkHo';
+    var authClient = window.supabase.createClient(SB_URL, SB_KEY);
+
     document.getElementById('app').style.display = 'none';
-    function tryLogin() {
-      if (document.getElementById('lock-pw').value === PASS) {
-        localStorage.setItem(KEY, '1');
+
+    authClient.auth.getSession().then(function(res) {
+      if (res.data.session) {
         document.getElementById('lock-screen').classList.add('hidden');
         document.getElementById('app').style.display = '';
-      } else {
+      }
+    });
+
+    async function tryLogin() {
+      var email = document.getElementById('lock-email').value.trim();
+      var pw = document.getElementById('lock-pw').value;
+      var btn = document.getElementById('lock-btn');
+      btn.disabled = true;
+      btn.textContent = '登录中...';
+      var { error } = await authClient.auth.signInWithPassword({ email: email, password: pw });
+      btn.disabled = false;
+      btn.textContent = '开门';
+      if (error) {
         document.getElementById('lock-err').style.display = 'block';
+      } else {
+        document.getElementById('lock-screen').classList.add('hidden');
+        document.getElementById('app').style.display = '';
       }
     }
     document.getElementById('lock-btn').addEventListener('click', tryLogin);
@@ -243,7 +259,6 @@
   })();
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
