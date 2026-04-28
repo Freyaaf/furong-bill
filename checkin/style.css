@@ -925,6 +925,36 @@ html, body {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* ===== 导出 ===== */
+.export-section {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.export-btn {
+  background: var(--paper);
+  color: var(--aubergine);
+  border: 1.5px solid var(--lilac);
+  padding: 10px 28px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.export-btn:hover {
+  background: var(--moon-white);
+  border-color: var(--indigo);
+  color: var(--ink);
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* ===== 滚动条 ===== */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

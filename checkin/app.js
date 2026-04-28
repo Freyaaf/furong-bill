@@ -592,6 +592,50 @@ async function updateStreak() {
   document.getElementById('streakNumber').textContent = await calcStreak();
 }
 
+// ===== 导出 =====
+
+window.exportData = async function() {
+  const btn = document.getElementById('exportBtn');
+  btn.textContent = '导出中…';
+  btn.disabled = true;
+
+  let rows = [];
+  if (useSupabase) {
+    const { data } = await sb.from('daily_checkins').select('*').eq('completed', true).order('checkin_date', { ascending: true });
+    rows = data || [];
+  }
+
+  const itemNames = {};
+  ITEMS.forEach(i => { itemNames[i.type] = i.name; });
+
+  let csv = '﻿日期,项目,数量,气味,形态,感受,备注\n';
+  rows.forEach(r => {
+    const d = r.details || {};
+    const name = itemNames[r.item_type] || r.item_type;
+    const fields = [
+      r.checkin_date,
+      name,
+      d.quantity || '',
+      d.odor || '',
+      d.shape || '',
+      d.feeling || '',
+      (d.note || '').replace(/"/g, '""'),
+    ];
+    csv += fields.map(f => f.includes(',') || f.includes('"') || f.includes('\n') ? `"${f}"` : f).join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `打卡记录_${todayStr()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  btn.textContent = '导出数据';
+  btn.disabled = false;
+};
+
 // ===== 导航 =====
 
 document.getElementById('prevMonth').onclick = () => {
