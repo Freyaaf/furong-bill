@@ -330,9 +330,10 @@ html, body {
 .form-group.half { flex: 1; }
 
 /* Chips */
-.category-chips, .recurrence-chips, .priority-chips {
+.category-chips, .recurrence-chips, .priority-chips, .weekday-chips {
   display: flex; flex-wrap: wrap; gap: 6px;
 }
+.weekday-chips { margin-top: 8px; }
 .chip {
   padding: 5px 14px; border: 1px solid var(--lilac); border-radius: 20px;
   background: transparent; color: var(--aubergine);

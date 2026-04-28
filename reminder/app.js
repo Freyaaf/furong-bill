@@ -4,6 +4,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DEFAULT_CATEGORIES = ['全部', '日常', '学习', '工作', '财务', '生活'];
 const RECURRENCE_LABELS = { daily: '每天', weekly: '每周', monthly: '每月', yearly: '每年' };
+const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 const PRIORITY_LABELS = { 0: '', 1: '低', 5: '中', 9: '高' };
 
 let state = {
@@ -260,7 +261,11 @@ function renderItem(r, isDone) {
     meta += `<span class="meta-tag meta-category">${r.category}</span>`;
   }
   if (r.recurrence_rule) {
-    meta += `<span class="meta-tag meta-recurrence">${RECURRENCE_LABELS[r.recurrence_rule] || r.recurrence_rule}</span>`;
+    let recLabel = RECURRENCE_LABELS[r.recurrence_rule] || r.recurrence_rule;
+    if (r.recurrence_rule === 'weekly' && r.recurrence_weekday != null) {
+      recLabel += WEEKDAY_NAMES[r.recurrence_weekday];
+    }
+    meta += `<span class="meta-tag meta-recurrence">${recLabel}</span>`;
   }
   if (r.priority > 0) {
     const pc = r.priority >= 9 ? 'p-high' : r.priority >= 5 ? 'p-mid' : 'p-low';
@@ -366,6 +371,13 @@ function setupModal() {
     btn.onclick = () => {
       document.querySelectorAll('#form-recurrence .chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      toggleWeekdayPicker();
+    };
+  });
+  document.querySelectorAll('#form-weekday .chip').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#form-weekday .chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     };
   });
   document.querySelectorAll('#form-priority .chip').forEach(btn => {
@@ -374,6 +386,16 @@ function setupModal() {
       btn.classList.add('active');
     };
   });
+}
+
+function toggleWeekdayPicker() {
+  const rec = getActiveChip('#form-recurrence');
+  const wd = document.getElementById('form-weekday');
+  if (rec === 'weekly') {
+    wd.classList.remove('hidden');
+  } else {
+    wd.classList.add('hidden');
+  }
 }
 
 function openAdd() {
@@ -390,6 +412,8 @@ function openAdd() {
   renderFormCategories(state.category === '全部' ? '全部' : state.category);
   setChipActive('#form-recurrence', '');
   setChipActive('#form-priority', '0');
+  setChipActive('#form-weekday', '1');
+  toggleWeekdayPicker();
 
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
@@ -425,6 +449,8 @@ function openEdit(id) {
   renderFormCategories(r.category || '全部');
   setChipActive('#form-recurrence', r.recurrence_rule || '');
   setChipActive('#form-priority', String(r.priority || 0));
+  setChipActive('#form-weekday', String(r.recurrence_weekday ?? 1));
+  toggleWeekdayPicker();
 
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
@@ -489,10 +515,13 @@ async function saveForm() {
     remind_at = new Date(remindDate + 'T' + (remindTime || '09:00') + ':00+08:00').toISOString();
   }
 
+  const weekday = recurrence === 'weekly' ? parseInt(getActiveChip('#form-weekday') || '1') : null;
+
   const row = {
     title, category, priority, notes,
     due_date, remind_at,
     recurrence_rule: recurrence || null,
+    recurrence_weekday: weekday,
     notified: false,
   };
 
