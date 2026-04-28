@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>琳琳的待办</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&display=swap">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#F5F0F7">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -147,21 +147,11 @@
         </div>
         <div class="form-row">
           <div class="form-group half">
-            <label>截止日期</label>
-            <input type="date" id="form-due-date">
-          </div>
-          <div class="form-group half">
-            <label>截止时间</label>
-            <input type="time" id="form-due-time">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group half">
-            <label>提醒时间</label>
+            <label>提醒日期</label>
             <input type="date" id="form-remind-date">
           </div>
           <div class="form-group half">
-            <label>&nbsp;</label>
+            <label>提醒时间</label>
             <input type="time" id="form-remind-time">
           </div>
         </div>
@@ -181,6 +171,21 @@
             <button class="chip" data-val="5">周五</button>
             <button class="chip" data-val="6">周六</button>
             <button class="chip" data-val="0">周日</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="deadline-toggle">
+            <label class="toggle-label" id="deadline-toggle">+ 设置截止日期</label>
+          </div>
+          <div class="deadline-fields hidden" id="deadline-fields">
+            <div class="form-row">
+              <div class="form-group half">
+                <input type="date" id="form-due-date">
+              </div>
+              <div class="form-group half">
+                <input type="time" id="form-due-time">
+              </div>
+            </div>
           </div>
         </div>
         <div class="form-group">
@@ -204,6 +209,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

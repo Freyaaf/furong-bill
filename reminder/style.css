@@ -350,6 +350,14 @@ html, body {
   font-size: 13px; cursor: pointer; font-family: inherit;
 }
 
+/* Deadline toggle */
+.deadline-toggle { margin-bottom: 4px; }
+.toggle-label {
+  font-size: 13px; color: var(--grape); cursor: pointer;
+}
+.toggle-label:hover { color: var(--indigo); }
+.toggle-label.open { color: var(--snow-grey); }
+
 /* Buttons */
 .btn-save {
   padding: 10px 28px; border: none; border-radius: var(--radius);

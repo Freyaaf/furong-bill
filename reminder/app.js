@@ -386,6 +386,15 @@ function setupModal() {
       btn.classList.add('active');
     };
   });
+
+  const deadlineToggle = document.getElementById('deadline-toggle');
+  deadlineToggle.onclick = () => {
+    const fields = document.getElementById('deadline-fields');
+    const isHidden = fields.classList.contains('hidden');
+    fields.classList.toggle('hidden');
+    deadlineToggle.textContent = isHidden ? '- 收起截止日期' : '+ 设置截止日期';
+    deadlineToggle.classList.toggle('open', isHidden);
+  };
 }
 
 function toggleWeekdayPicker() {
@@ -395,6 +404,20 @@ function toggleWeekdayPicker() {
     wd.classList.remove('hidden');
   } else {
     wd.classList.add('hidden');
+  }
+}
+
+function resetDeadlineSection(showOpen) {
+  const fields = document.getElementById('deadline-fields');
+  const toggle = document.getElementById('deadline-toggle');
+  if (showOpen) {
+    fields.classList.remove('hidden');
+    toggle.textContent = '- 收起截止日期';
+    toggle.classList.add('open');
+  } else {
+    fields.classList.add('hidden');
+    toggle.textContent = '+ 设置截止日期';
+    toggle.classList.remove('open');
   }
 }
 
@@ -408,6 +431,7 @@ function openAdd() {
   document.getElementById('form-remind-time').value = '';
   document.getElementById('form-notes').value = '';
   document.getElementById('form-delete').classList.add('hidden');
+  resetDeadlineSection(false);
 
   renderFormCategories(state.category === '全部' ? '全部' : state.category);
   setChipActive('#form-recurrence', '');
@@ -428,22 +452,29 @@ function openEdit(id) {
   document.getElementById('form-notes').value = r.notes || '';
   document.getElementById('form-delete').classList.remove('hidden');
 
-  if (r.due_date) {
-    const d = new Date(r.due_date);
-    document.getElementById('form-due-date').value = dateStr(d);
-    document.getElementById('form-due-time').value = timeStr(d);
-  } else {
-    document.getElementById('form-due-date').value = '';
-    document.getElementById('form-due-time').value = '';
-  }
-
   if (r.remind_at) {
     const d = new Date(r.remind_at);
+    document.getElementById('form-remind-date').value = dateStr(d);
+    document.getElementById('form-remind-time').value = timeStr(d);
+  } else if (r.due_date) {
+    const d = new Date(r.due_date);
     document.getElementById('form-remind-date').value = dateStr(d);
     document.getElementById('form-remind-time').value = timeStr(d);
   } else {
     document.getElementById('form-remind-date').value = '';
     document.getElementById('form-remind-time').value = '';
+  }
+
+  const hasSeparateDeadline = r.due_date && r.remind_at && r.due_date !== r.remind_at;
+  if (hasSeparateDeadline) {
+    const d = new Date(r.due_date);
+    document.getElementById('form-due-date').value = dateStr(d);
+    document.getElementById('form-due-time').value = timeStr(d);
+    resetDeadlineSection(true);
+  } else {
+    document.getElementById('form-due-date').value = '';
+    document.getElementById('form-due-time').value = '';
+    resetDeadlineSection(false);
   }
 
   renderFormCategories(r.category || '全部');
@@ -506,13 +537,16 @@ async function saveForm() {
   const remindDate = document.getElementById('form-remind-date').value;
   const remindTime = document.getElementById('form-remind-time').value;
 
-  let due_date = null;
-  if (dueDate) {
-    due_date = new Date(dueDate + 'T' + (dueTime || '23:59') + ':00+08:00').toISOString();
-  }
   let remind_at = null;
   if (remindDate) {
     remind_at = new Date(remindDate + 'T' + (remindTime || '09:00') + ':00+08:00').toISOString();
+  }
+  let due_date = null;
+  const deadlineOpen = !document.getElementById('deadline-fields').classList.contains('hidden');
+  if (deadlineOpen && dueDate) {
+    due_date = new Date(dueDate + 'T' + (dueTime || '23:59') + ':00+08:00').toISOString();
+  } else if (remind_at) {
+    due_date = remind_at;
   }
 
   const weekday = recurrence === 'weekly' ? parseInt(getActiveChip('#form-weekday') || '1') : null;
