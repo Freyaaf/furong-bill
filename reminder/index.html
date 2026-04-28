@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>琳琳的待办</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&display=swap">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#F5F0F7">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -138,68 +138,61 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>标题</label>
-          <input type="text" id="form-title" placeholder="要做什么？" autocomplete="off">
+          <input type="text" id="form-title" placeholder="要做什么？" autocomplete="off" class="title-input">
+          <textarea id="form-notes" rows="1" placeholder="备注" class="notes-input"></textarea>
         </div>
-        <div class="form-group">
-          <label>分类</label>
-          <div class="category-chips" id="form-categories"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group half">
-            <label>提醒日期</label>
-            <input type="date" id="form-remind-date">
+
+        <div class="form-list">
+          <div class="form-list-item">
+            <span class="form-list-label">日期</span>
+            <input type="date" id="form-remind-date" class="form-list-input">
           </div>
-          <div class="form-group half">
-            <label>提醒时间</label>
-            <input type="time" id="form-remind-time">
+          <div class="form-list-item">
+            <span class="form-list-label">时间</span>
+            <input type="time" id="form-remind-time" class="form-list-input">
           </div>
-        </div>
-        <div class="form-group">
-          <label>重复</label>
-          <div class="recurrence-chips" id="form-recurrence">
-            <button class="chip active" data-val="">不重复</button>
-            <button class="chip" data-val="daily">每天</button>
-            <button class="chip" data-val="weekly">每周</button>
-            <button class="chip" data-val="monthly">每月</button>
+          <div class="form-list-item">
+            <span class="form-list-label">重复</span>
+            <select id="form-recurrence-select" class="form-list-input">
+              <option value="">不重复</option>
+              <option value="daily">每天</option>
+              <option value="weekly">每周</option>
+              <option value="monthly">每月</option>
+            </select>
           </div>
-          <div class="weekday-chips hidden" id="form-weekday">
-            <button class="chip" data-val="1">周一</button>
-            <button class="chip" data-val="2">周二</button>
-            <button class="chip" data-val="3">周三</button>
-            <button class="chip" data-val="4">周四</button>
-            <button class="chip" data-val="5">周五</button>
-            <button class="chip" data-val="6">周六</button>
-            <button class="chip" data-val="0">周日</button>
+          <div class="form-list-item hidden" id="weekday-row">
+            <span class="form-list-label">周几</span>
+            <select id="form-weekday-select" class="form-list-input">
+              <option value="1">周一</option>
+              <option value="2">周二</option>
+              <option value="3">周三</option>
+              <option value="4">周四</option>
+              <option value="5">周五</option>
+              <option value="6">周六</option>
+              <option value="0">周日</option>
+            </select>
           </div>
-        </div>
-        <div class="form-group">
-          <div class="deadline-toggle">
-            <label class="toggle-label" id="deadline-toggle">+ 设置截止日期</label>
+          <div class="form-list-item">
+            <span class="form-list-label">列表</span>
+            <select id="form-category-select" class="form-list-input"></select>
           </div>
-          <div class="deadline-fields hidden" id="deadline-fields">
-            <div class="form-row">
-              <div class="form-group half">
-                <input type="date" id="form-due-date">
-              </div>
-              <div class="form-group half">
-                <input type="time" id="form-due-time">
-              </div>
-            </div>
+          <div class="form-list-item">
+            <span class="form-list-label">优先级</span>
+            <select id="form-priority-select" class="form-list-input">
+              <option value="0">无</option>
+              <option value="1">低</option>
+              <option value="5">中</option>
+              <option value="9">高</option>
+            </select>
           </div>
-        </div>
-        <div class="form-group">
-          <label>优先级</label>
-          <div class="priority-chips" id="form-priority">
-            <button class="chip active" data-val="0">无</button>
-            <button class="chip" data-val="1">低</button>
-            <button class="chip" data-val="5">中</button>
-            <button class="chip" data-val="9">高</button>
+          <div class="form-list-item">
+            <span class="form-list-label">截止日期</span>
+            <input type="date" id="form-due-date" class="form-list-input">
           </div>
-        </div>
-        <div class="form-group">
-          <label>备注</label>
-          <textarea id="form-notes" rows="2" placeholder="补充说明（可选）"></textarea>
+          <div class="form-list-item hidden" id="due-time-row">
+            <span class="form-list-label">截止时间</span>
+            <input type="time" id="form-due-time" class="form-list-input">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -209,6 +202,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
