@@ -384,10 +384,6 @@ function setupModal() {
     document.getElementById('weekday-row').classList.toggle('hidden', val !== 'weekly');
   };
 
-  document.getElementById('form-due-date').onchange = () => {
-    const val = document.getElementById('form-due-date').value;
-    document.getElementById('due-time-row').classList.toggle('hidden', !val);
-  };
 }
 
 function openAdd() {
@@ -397,14 +393,11 @@ function openAdd() {
   document.getElementById('form-notes').value = '';
   document.getElementById('form-remind-date').value = '';
   document.getElementById('form-remind-time').value = '';
-  document.getElementById('form-due-date').value = '';
-  document.getElementById('form-due-time').value = '';
   document.getElementById('form-recurrence-select').value = '';
   document.getElementById('form-weekday-select').value = '1';
   document.getElementById('form-priority-select').value = '0';
   document.getElementById('form-delete').classList.add('hidden');
   document.getElementById('weekday-row').classList.add('hidden');
-  document.getElementById('due-time-row').classList.add('hidden');
 
   populateCategorySelect(state.category === '全部' ? '全部' : state.category);
   document.getElementById('modal-overlay').classList.remove('hidden');
@@ -431,18 +424,6 @@ function openEdit(id) {
   } else {
     document.getElementById('form-remind-date').value = '';
     document.getElementById('form-remind-time').value = '';
-  }
-
-  const hasSeparateDeadline = r.due_date && r.remind_at && r.due_date !== r.remind_at;
-  if (hasSeparateDeadline) {
-    const d = new Date(r.due_date);
-    document.getElementById('form-due-date').value = dateStr(d);
-    document.getElementById('form-due-time').value = timeStr(d);
-    document.getElementById('due-time-row').classList.remove('hidden');
-  } else {
-    document.getElementById('form-due-date').value = '';
-    document.getElementById('form-due-time').value = '';
-    document.getElementById('due-time-row').classList.add('hidden');
   }
 
   document.getElementById('form-recurrence-select').value = r.recurrence_rule || '';
@@ -476,17 +457,11 @@ async function saveForm() {
 
   const remindDate = document.getElementById('form-remind-date').value;
   const remindTime = document.getElementById('form-remind-time').value;
-  const dueDate = document.getElementById('form-due-date').value;
-  const dueTime = document.getElementById('form-due-time').value;
 
   let remind_at = null;
+  let due_date = null;
   if (remindDate) {
     remind_at = new Date(remindDate + 'T' + (remindTime || '09:00') + ':00+08:00').toISOString();
-  }
-  let due_date = null;
-  if (dueDate) {
-    due_date = new Date(dueDate + 'T' + (dueTime || '23:59') + ':00+08:00').toISOString();
-  } else if (remind_at) {
     due_date = remind_at;
   }
 
