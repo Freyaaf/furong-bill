@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <title>琳琳的待办</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F5F0F7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+  <style>
+    #lock-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(160deg, #FAF6F0 0%, #F5F0F7 35%, #EDE2F0 70%, #E8E1EC 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #lock-screen.hidden { display: none; }
+    .lock-box {
+      background: #FAF6F0; border: 1px solid #E8E1EC; border-radius: 4px;
+      padding: 40px 28px; text-align: center;
+      box-shadow: 0 2px 12px rgba(92,78,110,.06);
+      max-width: 300px; width: 88%;
+    }
+    .lock-box .icon {
+      font-size: 28px; margin-bottom: 12px;
+      color: var(--aubergine, #5C4E6E); letter-spacing: 0.3em;
+      font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
+    }
+    .lock-box h2 {
+      font-size: 20px; color: #2B2438; margin-bottom: 6px;
+      font-weight: bold; letter-spacing: 0.25em;
+      font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
+    }
+    .lock-box .hint {
+      font-size: 14px; color: #5C4E6E; margin-bottom: 24px;
+      font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
+      letter-spacing: 0.1em;
+    }
+    .lock-box input[type="email"],
+    .lock-box input[type="password"] {
+      width: 100%; padding: 12px; border: 1px solid #D9C9E0; border-radius: 4px;
+      font-size: 16px; text-align: center; outline: none; background: #F5F0F7; color: #2B2438;
+      font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
+    }
+    .lock-box input:focus { border-color: #A896B8; box-shadow: 0 0 0 2px rgba(168,150,184,.12); }
+    .lock-box button {
+      width: 100%; margin-top: 14px; padding: 12px;
+      background: rgba(92,78,110,0.82); color: #F5F0F7;
+      border: none; border-radius: 4px; font-size: 16px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(92,78,110,.15);
+      font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
+      letter-spacing: 0.2em;
+    }
+    .lock-box .err {
+      color: #A64B4B; font-size: 13px; margin-top: 10px; display: none;
+      font-family: 'Noto Serif SC', 'Songti SC', 'Kaiti SC', serif;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <!-- 锁屏 -->
+  <div id="lock-screen">
+    <div class="lock-box">
+      <div class="icon">办</div>
+      <h2>琳琳的待办</h2>
+      <p class="hint">今天要做什么？</p>
+      <input type="email" id="lock-email" placeholder="邮箱" autofocus>
+      <input type="password" id="lock-pw" placeholder="密码" style="margin-top:10px">
+      <button id="lock-btn">开门</button>
+      <p class="err" id="lock-err">不对，再想想？</p>
+    </div>
+  </div>
+
+  <!-- 主应用 -->
+  <div id="app">
+    <header class="app-header">
+      <h1>琳琳的待办</h1>
+    </header>
+
+    <!-- 快速添加 -->
+    <div class="quick-add">
+      <input type="text" id="quick-input" placeholder="添加新待办…" autocomplete="off">
+      <button id="quick-btn" title="添加">+</button>
+    </div>
+
+    <!-- 分类筛选 -->
+    <div class="category-bar" id="category-bar"></div>
+
+    <!-- 待办列表 -->
+    <div class="tab-content active" id="tab-todo">
+      <div id="todo-list" class="reminder-list"></div>
+      <div id="todo-empty" class="empty-state hidden">没有待办事项</div>
+    </div>
+
+    <!-- 已完成列表 -->
+    <div class="tab-content" id="tab-done">
+      <div class="done-header">
+        <span id="done-count"></span>
+        <select id="done-filter-period" class="done-period-select">
+          <option value="all">全部</option>
+          <option value="week">最近一周</option>
+          <option value="month" selected>最近一月</option>
+          <option value="3month">最近三月</option>
+          <option value="year">最近一年</option>
+        </select>
+      </div>
+      <div id="done-list" class="reminder-list"></div>
+      <div id="done-empty" class="empty-state hidden">还没有完成的事项</div>
+    </div>
+
+    <!-- 底部导航 -->
+    <nav class="app-nav">
+      <button class="nav-btn active" data-tab="todo">
+        <span class="nav-icon">待</span>
+        <span class="nav-label">待办</span>
+      </button>
+      <button class="nav-btn" data-tab="done">
+        <span class="nav-icon">成</span>
+        <span class="nav-label">已完成</span>
+      </button>
+    </nav>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <!-- 添加/编辑弹窗 -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">添加待办</h3>
+        <button id="modal-close" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>标题</label>
+          <input type="text" id="form-title" placeholder="要做什么？" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>分类</label>
+          <div class="category-chips" id="form-categories"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>截止日期</label>
+            <input type="date" id="form-due-date">
+          </div>
+          <div class="form-group half">
+            <label>截止时间</label>
+            <input type="time" id="form-due-time">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>提醒时间</label>
+            <input type="date" id="form-remind-date">
+          </div>
+          <div class="form-group half">
+            <label>&nbsp;</label>
+            <input type="time" id="form-remind-time">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>重复</label>
+          <div class="recurrence-chips" id="form-recurrence">
+            <button class="chip active" data-val="">不重复</button>
+            <button class="chip" data-val="daily">每天</button>
+            <button class="chip" data-val="weekly">每周</button>
+            <button class="chip" data-val="monthly">每月</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>优先级</label>
+          <div class="priority-chips" id="form-priority">
+            <button class="chip active" data-val="0">无</button>
+            <button class="chip" data-val="1">低</button>
+            <button class="chip" data-val="5">中</button>
+            <button class="chip" data-val="9">高</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>备注</label>
+          <textarea id="form-notes" rows="2" placeholder="补充说明（可选）"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="form-delete" class="btn-delete hidden">删除</button>
+        <button id="form-save" class="btn-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>
