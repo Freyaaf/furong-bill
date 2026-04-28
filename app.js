@@ -362,10 +362,43 @@ function fixDecimalInput(el) {
   });
 }
 
-function initNumpad() {
-  const input = document.getElementById('bill-amount');
-  const pad = document.getElementById('numpad');
+function calcExpr(expr) {
+  const clean = expr.replace(/[+\-]$/, '').replace(/−/g, '-');
+  const tokens = clean.match(/[+\-]?[^+\-]+/g);
+  if (!tokens) return 0;
+  const result = tokens.reduce((sum, t) => sum + (parseFloat(t) || 0), 0);
+  return Math.round(result * 100) / 100;
+}
 
+function numpadHTML(id) {
+  return `<div class="numpad hidden" id="${id}">
+    <div class="numpad-row">
+      <button type="button" class="numpad-key">1</button>
+      <button type="button" class="numpad-key">2</button>
+      <button type="button" class="numpad-key">3</button>
+      <button type="button" class="numpad-key numpad-op">+</button>
+    </div>
+    <div class="numpad-row">
+      <button type="button" class="numpad-key">4</button>
+      <button type="button" class="numpad-key">5</button>
+      <button type="button" class="numpad-key">6</button>
+      <button type="button" class="numpad-key numpad-op">−</button>
+    </div>
+    <div class="numpad-row">
+      <button type="button" class="numpad-key">7</button>
+      <button type="button" class="numpad-key">8</button>
+      <button type="button" class="numpad-key">9</button>
+      <button type="button" class="numpad-key numpad-del">⌫</button>
+    </div>
+    <div class="numpad-row">
+      <button type="button" class="numpad-key">.</button>
+      <button type="button" class="numpad-key">0</button>
+      <button type="button" class="numpad-key numpad-eq" style="grid-column:span 2">=</button>
+    </div>
+  </div>`;
+}
+
+function setupNumpad(input, pad) {
   input.addEventListener('click', () => {
     pad.classList.remove('hidden');
     input.classList.add('numpad-active');
@@ -376,21 +409,38 @@ function initNumpad() {
     if (!key) return;
     e.preventDefault();
     const val = input.value;
+
     if (key.classList.contains('numpad-del')) {
       input.value = val.slice(0, -1);
+    } else if (key.classList.contains('numpad-eq')) {
+      const r = calcExpr(val);
+      input.value = r >= 0 ? r.toFixed(2) : '0.00';
+    } else if (key.classList.contains('numpad-op')) {
+      if (val === '' || /[+\-]$/.test(val)) return;
+      input.value = val + (key.textContent === '+' ? '+' : '-');
     } else if (key.textContent === '.') {
-      if (!val.includes('.')) input.value = val + '.';
+      const seg = val.split(/[+\-]/).pop();
+      if (!seg.includes('.')) input.value = val + '.';
     } else {
-      if (val.includes('.') && val.split('.')[1].length >= 2) return;
+      const seg = val.split(/[+\-]/).pop();
+      if (seg.includes('.') && seg.split('.')[1].length >= 2) return;
       input.value = val + key.textContent;
     }
   });
+}
+
+function initNumpad() {
+  const input = document.getElementById('bill-amount');
+  const pad = document.getElementById('numpad');
+  setupNumpad(input, pad);
 
   document.addEventListener('click', e => {
-    if (!e.target.closest('#numpad') && e.target !== input) {
-      pad.classList.add('hidden');
-      input.classList.remove('numpad-active');
-    }
+    if (e.target.closest('.numpad') || e.target.hasAttribute('readonly') && e.target.closest('.form-group')?.querySelector('.numpad')) return;
+    document.querySelectorAll('.numpad:not(.hidden)').forEach(p => {
+      p.classList.add('hidden');
+      const inp = p.closest('.form-group')?.querySelector('input');
+      if (inp) inp.classList.remove('numpad-active');
+    });
   });
 }
 
@@ -457,7 +507,7 @@ function initAddForm() {
     const isIncome = state.addType === 'income';
     const date = document.getElementById('bill-date').value;
     const item = document.getElementById('bill-item').value.trim();
-    const amount = Math.round(parseFloat(document.getElementById('bill-amount').value) * 100) / 100;
+    const amount = calcExpr(document.getElementById('bill-amount').value);
     const reason = isIncome
       ? (document.getElementById('bill-reason-income').value.trim() || null)
       : (document.getElementById('bill-reason').value.trim() || null);
@@ -678,7 +728,8 @@ async function openEditModal(id) {
       <input type="text" id="edit-item" value="${esc(bill.item)}">
     </div>
     <div class="form-group"><label>金额</label>
-      <input type="text" id="edit-amount" inputmode="decimal" value="${parseFloat(bill.amount).toFixed(2)}">
+      <input type="text" id="edit-amount" inputmode="none" readonly value="${parseFloat(bill.amount).toFixed(2)}">
+      ${numpadHTML('edit-numpad')}
     </div>
     <div class="form-group"><label>类别</label>
       <div class="chips" id="edit-cats">${catOptions}</div>
@@ -695,7 +746,7 @@ async function openEditModal(id) {
     </div>
   `);
 
-  fixDecimalInput(document.getElementById('edit-amount'));
+  setupNumpad(document.getElementById('edit-amount'), document.getElementById('edit-numpad'));
   document.getElementById('edit-cats').addEventListener('click', e => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
@@ -721,7 +772,7 @@ window.saveEdit = async function(id, isIncome) {
   const updates = {
     date: document.getElementById('edit-date').value,
     item: document.getElementById('edit-item').value.trim(),
-    amount: Math.round(parseFloat(document.getElementById('edit-amount').value) * 100) / 100,
+    amount: calcExpr(document.getElementById('edit-amount').value),
     category: catEl.dataset.cat,
     reason: document.getElementById('edit-reason').value.trim() || null,
   };

@@ -162,7 +162,7 @@ html, body {
   border: 1px solid var(--lotus-root); background: var(--moon-white);
 }
 .numpad.hidden { display: none; }
-.numpad-row { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.numpad-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; }
 .numpad-key {
   padding: 14px 0; font-size: 18px; font-weight: normal;
   border: none; background: var(--paper); color: var(--ink);
@@ -175,10 +175,13 @@ html, body {
 .numpad-key:last-child { border-right: none; }
 .numpad-key:active { background: var(--lotus-root); }
 .numpad-del { font-size: 18px; color: var(--grape); }
+.numpad-op { color: var(--grape); font-weight: 700; }
+.numpad-eq { background: var(--grape); color: #fff; font-weight: 700; }
+.numpad-eq:active { background: var(--indigo); }
 
-#bill-amount.numpad-active {
-  border-color: var(--grape);
-  box-shadow: 0 0 0 2px rgba(168,150,184,0.12);
+.numpad-active {
+  border-color: var(--grape) !important;
+  box-shadow: 0 0 0 2px rgba(168,150,184,0.12) !important;
 }
 
 .text-muted { color: var(--text-muted); font-weight: 400; }
