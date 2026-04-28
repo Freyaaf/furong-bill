@@ -837,6 +837,94 @@ html, body {
   }
 }
 
+/* ===== 排便趋势 ===== */
+.bowel-trend-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.bowel-dist {
+  margin-bottom: 18px;
+}
+
+.bowel-dist:last-child {
+  margin-bottom: 0;
+}
+
+.bowel-dist-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--aubergine);
+  margin-bottom: 8px;
+}
+
+.bowel-dist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.bowel-dist-label {
+  font-size: 12px;
+  color: var(--snow-grey);
+  width: 60px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.bowel-dist-bar-bg {
+  flex: 1;
+  height: 14px;
+  background: var(--moon-white);
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1px solid var(--lilac);
+}
+
+.bowel-dist-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--smoke), var(--indigo));
+  border-radius: 7px;
+  transition: width 0.4s ease;
+  min-width: 0;
+}
+
+.bowel-dist-pct {
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 32px;
+  flex-shrink: 0;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', '宋体', serif;
+}
+
+/* ===== 庆祝动效 ===== */
+.celebration-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(92, 78, 110, 0.92);
+  color: var(--paper);
+  padding: 20px 40px;
+  border-radius: var(--radius);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 12px 40px rgba(92, 78, 110, 0.35);
+}
+
+.celebration-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
 /* ===== 滚动条 ===== */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

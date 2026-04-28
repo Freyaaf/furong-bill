@@ -44,7 +44,8 @@ function todayStr() {
 function formatDateLabel(ds) {
   if (ds === todayStr()) return '今日打卡';
   const [y, m, d] = ds.split('-');
-  return `${parseInt(m)}月${parseInt(d)}日 打卡记录`;
+  const isPast = new Date(ds) < new Date(todayStr());
+  return `${parseInt(m)}月${parseInt(d)}日 ${isPast ? '补卡' : '打卡'}`;
 }
 
 // ===== 存储层 =====
@@ -407,9 +408,88 @@ function showBowelCard() {
   else { card.style.display = 'none'; }
 }
 
+// ===== 排便趋势 =====
+
+async function loadBowelTrend() {
+  const d = new Date();
+  const endDate = getDateStr(d);
+  d.setDate(d.getDate() - 29);
+  const startDate = getDateStr(d);
+
+  if (useSupabase) {
+    const { data } = await sb.from('daily_checkins').select('details')
+      .eq('item_type', 'bowel').eq('completed', true)
+      .gte('checkin_date', startDate).lte('checkin_date', endDate);
+    return (data || []).map(r => r.details).filter(d => d && Object.keys(d).length > 0);
+  }
+
+  const results = [];
+  for (let i = 0; i < 30; i++) {
+    const ds = getDateStr(d);
+    const local = loadLocal(ds);
+    if (local.bowel?.completed && local.bowel.details) results.push(local.bowel.details);
+    d.setDate(d.getDate() + 1);
+  }
+  return results;
+}
+
+async function renderBowelTrend() {
+  const container = document.getElementById('bowelTrend');
+  if (!container) return;
+
+  const data = await loadBowelTrend();
+  if (data.length === 0) {
+    container.innerHTML = '<p class="bowel-trend-empty">暂无排便数据</p>';
+    return;
+  }
+
+  function countField(field) {
+    const counts = {};
+    data.forEach(d => { if (d[field]) counts[d[field]] = (counts[d[field]] || 0) + 1; });
+    return counts;
+  }
+
+  function renderDist(title, counts, options) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total === 0) return '';
+    return `<div class="bowel-dist">
+      <div class="bowel-dist-title">${title}</div>
+      ${options.map(opt => {
+        const count = counts[opt] || 0;
+        const pct = Math.round(count / total * 100);
+        return `<div class="bowel-dist-row">
+          <span class="bowel-dist-label">${opt}</span>
+          <div class="bowel-dist-bar-bg"><div class="bowel-dist-bar-fill" style="width:${pct}%"></div></div>
+          <span class="bowel-dist-pct">${count}次</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  container.innerHTML =
+    renderDist('形态分布', countField('shape'), BOWEL_OPTIONS.shape.options) +
+    renderDist('感受分布', countField('feeling'), BOWEL_OPTIONS.feeling.options);
+}
+
+// ===== 庆祝动效 =====
+
+function showCelebration() {
+  if (document.querySelector('.celebration-toast')) return;
+  const toast = document.createElement('div');
+  toast.className = 'celebration-toast';
+  toast.textContent = '全部完成';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => { requestAnimationFrame(() => toast.classList.add('show')); });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 500);
+  }, 1800);
+}
+
 // ===== 交互 =====
 
 async function toggleCheckin(type) {
+  const prevDone = Object.values(dateCheckins).filter(v => v.completed).length;
   const current = dateCheckins[type];
 
   if (type === 'bowel') {
@@ -431,6 +511,9 @@ async function toggleCheckin(type) {
     }
   }
 
+  const nowDone = Object.values(dateCheckins).filter(v => v.completed).length;
+  if (nowDone === ITEMS.length && prevDone < ITEMS.length) showCelebration();
+
   renderCheckinList();
   renderOverview();
   renderQuickStats();
@@ -438,6 +521,7 @@ async function toggleCheckin(type) {
   renderMonthlyStats();
   renderItemStreaks();
   renderTrendChart();
+  renderBowelTrend();
   updateStreak();
 }
 
@@ -550,6 +634,7 @@ async function init() {
   renderMonthlyStats();
   renderItemStreaks();
   renderTrendChart();
+  renderBowelTrend();
   updateStreak();
   showBowelCard();
 }
