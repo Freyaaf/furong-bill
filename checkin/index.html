@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <title>琳琳的打卡</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css?v=20260428">
+  <style>
+    #lock-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 700px 600px at 12% 18%, rgba(201,184,212,0.30) 0%, transparent 60%),
+        radial-gradient(ellipse 500px 700px at 88% 55%, rgba(168,150,184,0.22) 0%, transparent 65%),
+        linear-gradient(160deg, #FAF6F0 0%, #F5F0F7 35%, #EDE2F0 70%, #E8E1EC 100%);
+    }
+    #lock-screen.hidden { display: none; }
+    .lock-box {
+      text-align: center; padding: 40px 32px; width: 320px;
+      background: #FAF6F0; border: 1px solid #D9C9E0; border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(92,78,110,.06);
+    }
+    .lock-box .icon {
+      font-size: 36px; margin-bottom: 12px; color: #5C4E6E;
+      font-family: 'Kaiti SC', 'STKaiti', serif;
+    }
+    .lock-box h2 {
+      font-size: 18px; color: #3D3450; margin-bottom: 6px;
+      font-family: 'Kaiti SC', 'STKaiti', serif; letter-spacing: 2px;
+    }
+    .lock-box .hint {
+      font-size: 13px; color: #A896B8; margin-bottom: 20px;
+      font-family: 'Kaiti SC', 'STKaiti', serif; font-style: italic;
+    }
+    .lock-box input[type="email"],
+    .lock-box input[type="password"] {
+      width: 100%; padding: 12px; border: 1px solid #D9C9E0; border-radius: 4px;
+      font-size: 16px; text-align: center; outline: none; background: #F5F0F7; color: #2B2438;
+      font-family: 'Kaiti SC', 'STKaiti', serif;
+    }
+    .lock-box input:focus { border-color: #A896B8; box-shadow: 0 0 0 2px rgba(168,150,184,.12); }
+    .lock-box button {
+      width: 100%; margin-top: 14px; padding: 12px;
+      background: rgba(92,78,110,0.82); color: #F5F0F7;
+      border: none; border-radius: 4px; font-size: 16px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(92,78,110,.15);
+      font-family: 'Kaiti SC', 'STKaiti', serif; letter-spacing: 0.2em;
+    }
+    .lock-box .err {
+      color: #A64B4B; font-size: 13px; margin-top: 10px; display: none;
+      font-family: 'Kaiti SC', 'STKaiti', serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="lock-screen">
+    <div class="lock-box">
+      <div class="icon">✿</div>
+      <h2>琳琳的打卡</h2>
+      <p class="hint">我帮你记着呢</p>
+      <input type="email" id="lock-email" placeholder="邮箱" autofocus>
+      <input type="password" id="lock-pw" placeholder="密码" style="margin-top:10px">
+      <button id="lock-btn">开门</button>
+      <p class="err" id="lock-err">不对，再想想？</p>
+    </div>
+  </div>
+
+  <div class="app" id="app" style="display:none;">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-text">琳琳的打卡</span>
+        <p class="motto">我帮你记着呢</p>
+      </div>
+
+      <div class="date-block">
+        <div class="date-text" id="dateText"></div>
+        <div class="time-text" id="timeText"></div>
+      </div>
+
+      <div class="today-overview">
+        <h3>今日总览</h3>
+        <div class="overview-items" id="overviewItems"></div>
+        <div class="progress-bar-container">
+          <div class="progress-label">
+            <span>完成度</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="streak-block">
+        <div class="streak-number" id="streakNumber">0</div>
+        <div class="streak-label">连续打卡天数</div>
+      </div>
+    </aside>
+
+    <header class="mobile-header" id="mobileHeader">
+      <div class="mobile-logo">琳琳的打卡</div>
+      <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+    </header>
+
+    <main class="main">
+      <div class="quick-stats" id="quickStats"></div>
+
+      <div class="content-grid">
+        <section class="card calendar-card">
+          <div class="card-header">
+            <h2>打卡日历</h2>
+            <div class="calendar-nav">
+              <button class="nav-btn" id="prevMonth">‹</button>
+              <span id="calendarTitle"></span>
+              <button class="nav-btn" id="nextMonth">›</button>
+            </div>
+          </div>
+          <div class="calendar" id="calendar"></div>
+        </section>
+
+        <section class="card checkin-card">
+          <h2 id="checkinTitle">今日打卡</h2>
+          <div class="checkin-list" id="checkinList"></div>
+        </section>
+      </div>
+
+      <section class="card bowel-card" id="bowelCard" style="display:none;">
+        <h2>排便详情</h2>
+        <div class="bowel-form" id="bowelForm"></div>
+      </section>
+
+      <section class="card stats-card">
+        <h2>本月统计</h2>
+        <div class="monthly-stats" id="monthlyStats"></div>
+      </section>
+
+      <section class="card streak-card">
+        <h2>各项连续天数</h2>
+        <div class="item-streaks" id="itemStreaks"></div>
+      </section>
+
+      <section class="card trend-card">
+        <h2>最近30天趋势</h2>
+        <div class="trend-chart" id="trendChart"></div>
+        <div class="trend-legend" id="trendLegend"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function() {
+    var SB_URL = 'https://otpcdlgwlaifirhfnnat.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGNkbGd3bGFpZmlyaGZubmF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4ODQ5NzQsImV4cCI6MjA5MTQ2MDk3NH0.nC92brW3QJPbkh9IQ8q3-S6W-Mw8WLtcKXoIJ-8xkHo';
+    var authClient = window.supabase.createClient(SB_URL, SB_KEY);
+
+    authClient.auth.getSession().then(function(res) {
+      if (res.data.session) {
+        document.getElementById('lock-screen').classList.add('hidden');
+        document.getElementById('app').style.display = '';
+      }
+    });
+
+    async function tryLogin() {
+      var email = document.getElementById('lock-email').value.trim();
+      var pw = document.getElementById('lock-pw').value;
+      var btn = document.getElementById('lock-btn');
+      btn.disabled = true;
+      btn.textContent = '登录中...';
+      var { error } = await authClient.auth.signInWithPassword({ email: email, password: pw });
+      btn.disabled = false;
+      btn.textContent = '开门';
+      if (error) {
+        document.getElementById('lock-err').style.display = 'block';
+      } else {
+        document.getElementById('lock-screen').classList.add('hidden');
+        document.getElementById('app').style.display = '';
+      }
+    }
+    document.getElementById('lock-btn').addEventListener('click', tryLogin);
+    document.getElementById('lock-pw').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') tryLogin();
+    });
+  })();
+  </script>
+  <script>
+  (function(){
+    var s = document.createElement('script');
+    s.src = 'app.js?v=' + Date.now();
+    document.body.appendChild(s);
+  })();
+  </script>
+</body>
+</html>

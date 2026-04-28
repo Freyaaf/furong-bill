@@ -1,0 +1,8 @@
+{
+  "name": "琳琳的打卡",
+  "short_name": "打卡",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#faf5ff",
+  "theme_color": "#7e22ce"
+}
