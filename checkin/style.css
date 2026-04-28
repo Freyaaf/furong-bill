@@ -30,7 +30,7 @@
 
 html, body {
   height: 100%;
-  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', 'Songti SC', 'STSong', '宋体', serif;
   font-size: 15px;
   color: var(--text);
   background:
@@ -102,7 +102,7 @@ html, body {
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--lotus-root);
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', '宋体', serif;
 }
 
 .today-overview h3 {
@@ -199,7 +199,7 @@ html, body {
   font-weight: 700;
   color: var(--grape);
   line-height: 1;
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', '宋体', serif;
 }
 
 .streak-label {
@@ -292,7 +292,7 @@ html, body {
   font-size: 18px;
   font-weight: 700;
   color: var(--aubergine);
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', '宋体', serif;
 }
 
 .stat-value.done {
@@ -630,7 +630,7 @@ html, body {
   font-size: 18px;
   font-weight: 700;
   color: var(--aubergine);
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', '宋体', serif;
 }
 
 .month-stat-total {
@@ -717,7 +717,7 @@ html, body {
   font-size: 20px;
   font-weight: 700;
   color: var(--aubergine);
-  font-family: 'Songti SC', 'STSong', '宋体', serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', '宋体', serif;
   line-height: 1;
 }
 
