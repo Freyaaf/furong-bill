@@ -46,6 +46,15 @@ function formatTime(isoStr) {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+function getRecordTime(rec) {
+  return rec.details?.record_time || formatTime(rec.created_at);
+}
+
+function nowTimeStr() {
+  const n = new Date();
+  return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`;
+}
+
 function countDoneTypes(checkins) {
   return ITEMS.filter(item => (checkins[item.type] || []).length > 0).length;
 }
@@ -282,7 +291,8 @@ function renderCheckinList() {
     if (count > 0) {
       html += `<div class="record-list">`;
       records.forEach(rec => {
-        const time = formatTime(rec.created_at);
+        const time = getRecordTime(rec);
+        const timeHtml = `<span class="record-time editable" onclick="event.stopPropagation(); editRecordTime('${item.type}', ${rec.id})">${time}</span>`;
         if (item.hasDetail) {
           const d = rec.details || {};
           const parts = [];
@@ -292,7 +302,7 @@ function renderCheckinList() {
           const summary = parts.length ? parts.join(' · ') : '点击填写详情';
           const note = d.note ? `<span class="record-note-text">${d.note}</span>` : '';
           html += `<div class="record-row clickable" data-id="${rec.id}" onclick="editBowelRecord(${rec.id})">
-            <span class="record-time">${time}</span>
+            ${timeHtml}
             <span class="record-summary">${summary}</span>
             ${note}
             <button class="record-del" onclick="event.stopPropagation(); deleteRecord('${item.type}', ${rec.id})">×</button>
@@ -300,7 +310,7 @@ function renderCheckinList() {
         } else {
           const note = rec.details?.note || '';
           html += `<div class="record-row" data-id="${rec.id}">
-            <span class="record-time">${time}</span>`;
+            ${timeHtml}`;
           if (note) {
             html += `<span class="record-note-text">${note}</span>
               <button class="record-note-btn" onclick="openRecordNote('${item.type}', ${rec.id})">编辑</button>`;
@@ -550,7 +560,7 @@ function showCelebration() {
 
 async function addRecord(type) {
   const prevDoneTypes = countDoneTypes(dateCheckins);
-  const record = await addCheckin(selectedDate, type, {});
+  const record = await addCheckin(selectedDate, type, { record_time: nowTimeStr() });
   if (!dateCheckins[type]) dateCheckins[type] = [];
   dateCheckins[type].push(record);
 
@@ -600,6 +610,36 @@ window.editBowelRecord = function(id) {
   editingBowelId = id;
   showBowelCard();
   document.getElementById('bowelCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+window.editRecordTime = function(type, id) {
+  const records = dateCheckins[type] || [];
+  const record = records.find(r => r.id === id);
+  if (!record) return;
+
+  const row = document.querySelector(`.record-row[data-id="${id}"]`);
+  if (!row) return;
+  const timeEl = row.querySelector('.record-time');
+  if (!timeEl || timeEl.querySelector('input')) return;
+
+  const current = getRecordTime(record);
+  timeEl.innerHTML = `<input type="time" class="time-picker" value="${current}" onchange="saveRecordTime('${type}', ${id}, this)" onblur="saveRecordTime('${type}', ${id}, this)">`;
+  const input = timeEl.querySelector('input');
+  input.focus();
+};
+
+window.saveRecordTime = async function(type, id, el) {
+  const newTime = el.value;
+  if (!newTime) { renderCheckinList(); return; }
+
+  const records = dateCheckins[type] || [];
+  const record = records.find(r => r.id === id);
+  if (!record) return;
+
+  const details = { ...(record.details || {}), record_time: newTime };
+  record.details = details;
+  await updateCheckinDetails(id, selectedDate, type, details);
+  renderCheckinList();
 };
 
 window.selectBowelOpt = function(key, value, el) {

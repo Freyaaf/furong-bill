@@ -542,6 +542,30 @@ html, body {
   min-width: 36px;
 }
 
+.record-time.editable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+  transition: background 0.15s;
+}
+
+.record-time.editable:hover {
+  background: rgba(142, 122, 168, 0.12);
+}
+
+.time-picker {
+  width: 70px;
+  padding: 2px 4px;
+  border: 1px solid var(--indigo);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  outline: none;
+}
+
 .record-summary {
   flex: 1;
   font-size: 11px;
