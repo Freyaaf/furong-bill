@@ -16,11 +16,7 @@ const BOWEL_OPTIONS = {
 };
 
 const TREND_COLORS = {
-  0: '#E8E1EC',
-  1: '#D9C9E0',
-  2: '#C9B8D4',
-  3: '#A896B8',
-  4: '#8E7AA8',
+  0: '#E8E1EC', 1: '#D9C9E0', 2: '#C9B8D4', 3: '#A896B8', 4: '#8E7AA8',
 };
 
 let sb = null;
@@ -29,23 +25,29 @@ let calendarMonth = new Date();
 let monthData = {};
 let selectedDate = todayStr();
 let dateCheckins = {};
+let editingBowelId = null;
 
 function getDateStr(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function todayStr() {
-  return getDateStr(new Date());
-}
+function todayStr() { return getDateStr(new Date()); }
 
 function formatDateLabel(ds) {
   if (ds === todayStr()) return '今日打卡';
-  const [y, m, d] = ds.split('-');
-  const isPast = new Date(ds) < new Date(todayStr());
-  return `${parseInt(m)}月${parseInt(d)}日 ${isPast ? '补卡' : '打卡'}`;
+  const [, m, d] = ds.split('-');
+  return `${parseInt(m)}月${parseInt(d)}日 ${new Date(ds) < new Date(todayStr()) ? '补卡' : '打卡'}`;
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  if (isNaN(d.getTime())) return '';
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function countDoneTypes(checkins) {
+  return ITEMS.filter(item => (checkins[item.type] || []).length > 0).length;
 }
 
 // ===== 存储层 =====
@@ -53,8 +55,17 @@ function formatDateLabel(ds) {
 function localKey(date) { return `checkin_${date}`; }
 
 function loadLocal(date) {
-  try { return JSON.parse(localStorage.getItem(localKey(date))) || {}; }
-  catch { return {}; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(localKey(date))) || {};
+    Object.keys(raw).forEach(type => {
+      if (raw[type] && !Array.isArray(raw[type])) {
+        raw[type] = raw[type].completed
+          ? [{ id: Date.now() + Math.random(), details: raw[type].details || {}, created_at: new Date().toISOString() }]
+          : [];
+      }
+    });
+    return raw;
+  } catch { return {}; }
 }
 
 function saveLocal(date, data) {
@@ -65,40 +76,61 @@ async function initSupabase() {
   try {
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data, error } = await sb.from('daily_checkins').select('id').limit(1);
-    if (!error) { useSupabase = true; }
+    if (!error) useSupabase = true;
   } catch {}
 }
 
 async function loadCheckins(date) {
   if (useSupabase) {
-    const { data } = await sb.from('daily_checkins').select('*').eq('checkin_date', date);
+    const { data } = await sb.from('daily_checkins').select('*')
+      .eq('checkin_date', date).eq('completed', true)
+      .order('created_at', { ascending: true });
     const result = {};
     (data || []).forEach(row => {
-      result[row.item_type] = { completed: row.completed, details: row.details || {} };
+      if (!result[row.item_type]) result[row.item_type] = [];
+      result[row.item_type].push({ id: row.id, details: row.details || {}, created_at: row.created_at });
     });
     return result;
   }
   return loadLocal(date);
 }
 
-async function saveCheckin(date, itemType, completed, details) {
+async function addCheckin(date, itemType, details) {
+  let record = { id: Date.now(), details: details || {}, created_at: new Date().toISOString() };
   if (useSupabase) {
-    const payload = { checkin_date: date, item_type: itemType, completed, details: details || {}, updated_at: new Date().toISOString() };
-    const { data: existing } = await sb.from('daily_checkins').select('id').eq('checkin_date', date).eq('item_type', itemType).maybeSingle();
-    if (existing) await sb.from('daily_checkins').update(payload).eq('id', existing.id);
-    else await sb.from('daily_checkins').insert(payload);
+    const { data } = await sb.from('daily_checkins')
+      .insert({ checkin_date: date, item_type: itemType, completed: true, details: details || {} })
+      .select('id, created_at').single();
+    if (data) { record.id = data.id; record.created_at = data.created_at; }
   }
   const local = loadLocal(date);
-  local[itemType] = { completed, details: details || {} };
+  if (!local[itemType]) local[itemType] = [];
+  local[itemType].push(record);
+  saveLocal(date, local);
+  return record;
+}
+
+async function deleteCheckinById(id, date, itemType) {
+  if (useSupabase) {
+    await sb.from('daily_checkins').delete().eq('id', id);
+  }
+  const local = loadLocal(date);
+  if (local[itemType]) {
+    local[itemType] = local[itemType].filter(r => r.id !== id);
+    if (local[itemType].length === 0) delete local[itemType];
+  }
   saveLocal(date, local);
 }
 
-async function deleteCheckin(date, itemType) {
+async function updateCheckinDetails(id, date, itemType, details) {
   if (useSupabase) {
-    await sb.from('daily_checkins').delete().eq('checkin_date', date).eq('item_type', itemType);
+    await sb.from('daily_checkins').update({ details, updated_at: new Date().toISOString() }).eq('id', id);
   }
   const local = loadLocal(date);
-  delete local[itemType];
+  if (local[itemType]) {
+    const rec = local[itemType].find(r => r.id === id);
+    if (rec) rec.details = details;
+  }
   saveLocal(date, local);
 }
 
@@ -108,27 +140,29 @@ async function loadMonthData(year, month) {
   const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`;
 
   if (useSupabase) {
-    const { data } = await sb.from('daily_checkins').select('checkin_date, item_type, completed')
+    const { data } = await sb.from('daily_checkins').select('checkin_date, item_type')
       .gte('checkin_date', startDate).lte('checkin_date', endDate).eq('completed', true);
-    const result = {};
+    const sets = {};
     (data || []).forEach(row => {
-      if (!result[row.checkin_date]) result[row.checkin_date] = 0;
-      result[row.checkin_date]++;
+      if (!sets[row.checkin_date]) sets[row.checkin_date] = new Set();
+      sets[row.checkin_date].add(row.item_type);
     });
+    const result = {};
+    Object.entries(sets).forEach(([d, s]) => { result[d] = s.size; });
     return result;
   }
 
   const result = {};
   for (let d = 1; d <= endDay; d++) {
     const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const count = Object.values(loadLocal(ds)).filter(v => v.completed).length;
+    const local = loadLocal(ds);
+    const count = Object.keys(local).filter(t => Array.isArray(local[t]) && local[t].length > 0).length;
     if (count > 0) result[ds] = count;
   }
   return result;
 }
 
 async function loadLast30Days() {
-  const result = {};
   const d = new Date();
   const endDate = getDateStr(d);
   d.setDate(d.getDate() - 29);
@@ -137,18 +171,21 @@ async function loadLast30Days() {
   if (useSupabase) {
     const { data } = await sb.from('daily_checkins').select('checkin_date, item_type')
       .gte('checkin_date', startDate).lte('checkin_date', endDate).eq('completed', true);
+    const sets = {};
     (data || []).forEach(row => {
-      if (!result[row.checkin_date]) result[row.checkin_date] = new Set();
-      result[row.checkin_date].add(row.item_type);
+      if (!sets[row.checkin_date]) sets[row.checkin_date] = new Set();
+      sets[row.checkin_date].add(row.item_type);
     });
     const counts = {};
-    Object.entries(result).forEach(([date, set]) => { counts[date] = set.size; });
+    Object.entries(sets).forEach(([date, set]) => { counts[date] = set.size; });
     return counts;
   }
 
+  const result = {};
   for (let i = 0; i < 30; i++) {
     const ds = getDateStr(d);
-    const count = Object.values(loadLocal(ds)).filter(v => v.completed).length;
+    const local = loadLocal(ds);
+    const count = Object.keys(local).filter(t => Array.isArray(local[t]) && local[t].length > 0).length;
     if (count > 0) result[ds] = count;
     d.setDate(d.getDate() + 1);
   }
@@ -161,7 +198,7 @@ async function calcStreak() {
   while (true) {
     const ds = getDateStr(d);
     const checkins = await loadCheckins(ds);
-    const doneCount = Object.values(checkins).filter(v => v.completed).length;
+    const doneCount = countDoneTypes(checkins);
     if (doneCount === ITEMS.length) { streak++; d.setDate(d.getDate() - 1); }
     else if (ds === todayStr() && doneCount > 0) { d.setDate(d.getDate() - 1); }
     else break;
@@ -175,7 +212,7 @@ async function calcItemStreak(itemType) {
   while (true) {
     const ds = getDateStr(d);
     const checkins = await loadCheckins(ds);
-    if (checkins[itemType]?.completed) { streak++; d.setDate(d.getDate() - 1); }
+    if ((checkins[itemType] || []).length > 0) { streak++; d.setDate(d.getDate() - 1); }
     else if (ds === todayStr()) { d.setDate(d.getDate() - 1); }
     else break;
   }
@@ -193,15 +230,14 @@ function renderClock() {
 
 function renderOverview() {
   const container = document.getElementById('overviewItems');
-
   const renderData = (data) => {
     let doneCount = 0;
     container.innerHTML = ITEMS.map(item => {
-      const checked = data[item.type]?.completed;
-      if (checked) doneCount++;
+      const count = (data[item.type] || []).length;
+      if (count > 0) doneCount++;
       return `<div class="overview-item">
         <span class="item-left"><span class="item-dot" style="background:${item.color}"></span>${item.name}</span>
-        <span class="status ${checked ? 'done' : 'pending'}">${checked ? '✓' : '—'}</span>
+        <span class="status ${count > 0 ? 'done' : 'pending'}">${count > 0 ? (count > 1 ? '×' + count : '✓') : '—'}</span>
       </div>`;
     }).join('');
     const pct = Math.round(doneCount / ITEMS.length * 100);
@@ -218,10 +254,10 @@ function renderOverview() {
 
 function renderQuickStats() {
   document.getElementById('quickStats').innerHTML = ITEMS.map(item => {
-    const checked = dateCheckins[item.type]?.completed;
+    const count = (dateCheckins[item.type] || []).length;
     return `<div class="stat-card">
       <div class="stat-dot" style="background:${item.color}"></div>
-      <div class="stat-value${checked ? ' done' : ''}">${checked ? '✓' : '—'}</div>
+      <div class="stat-value${count > 0 ? ' done' : ''}">${count > 0 ? count : '—'}</div>
       <div class="stat-label">${item.name}</div>
     </div>`;
   }).join('');
@@ -232,47 +268,55 @@ function renderCheckinList() {
   document.getElementById('checkinTitle').textContent = formatDateLabel(selectedDate);
 
   container.innerHTML = ITEMS.map(item => {
-    const record = dateCheckins[item.type];
-    const checked = record?.completed;
-    const note = record?.details?.note || '';
-    const detailClass = item.hasDetail ? ' has-detail' : '';
-    const arrow = item.hasDetail ? '<span class="detail-arrow">›</span>' : '';
+    const records = dateCheckins[item.type] || [];
+    const count = records.length;
+    const checked = count > 0;
 
-    let detailSummary = '';
-    if (checked && item.hasDetail && record?.details) {
-      const d = record.details;
-      const parts = [];
-      if (d.quantity) parts.push(d.quantity);
-      if (d.shape) parts.push(d.shape);
-      if (d.feeling) parts.push(d.feeling);
-      if (parts.length) detailSummary = `<div class="checkin-detail-summary">${parts.join(' · ')}</div>`;
+    let html = `<div class="checkin-group">
+      <div class="checkin-item${checked ? ' checked' : ''}" onclick="addRecord('${item.type}')">
+        <div class="checkin-dot" style="background:${item.color}"></div>
+        <div class="checkin-info"><div class="checkin-name">${item.name}</div></div>
+        <div class="checkin-count${checked ? ' active' : ''}">${checked ? count : ''}</div>
+      </div>`;
+
+    if (count > 0) {
+      html += `<div class="record-list">`;
+      records.forEach(rec => {
+        const time = formatTime(rec.created_at);
+        if (item.hasDetail) {
+          const d = rec.details || {};
+          const parts = [];
+          if (d.quantity) parts.push(d.quantity);
+          if (d.shape) parts.push(d.shape);
+          if (d.feeling) parts.push(d.feeling);
+          const summary = parts.length ? parts.join(' · ') : '点击填写详情';
+          const note = d.note ? `<span class="record-note-text">${d.note}</span>` : '';
+          html += `<div class="record-row clickable" data-id="${rec.id}" onclick="editBowelRecord(${rec.id})">
+            <span class="record-time">${time}</span>
+            <span class="record-summary">${summary}</span>
+            ${note}
+            <button class="record-del" onclick="event.stopPropagation(); deleteRecord('${item.type}', ${rec.id})">×</button>
+          </div>`;
+        } else {
+          const note = rec.details?.note || '';
+          html += `<div class="record-row" data-id="${rec.id}">
+            <span class="record-time">${time}</span>`;
+          if (note) {
+            html += `<span class="record-note-text">${note}</span>
+              <button class="record-note-btn" onclick="openRecordNote('${item.type}', ${rec.id})">编辑</button>`;
+          } else {
+            html += `<span class="record-spacer"></span>
+              <button class="record-note-btn" onclick="openRecordNote('${item.type}', ${rec.id})">备注</button>`;
+          }
+          html += `<button class="record-del" onclick="deleteRecord('${item.type}', ${rec.id})">×</button>
+          </div>`;
+        }
+      });
+      html += `</div>`;
     }
 
-    let noteHtml = '';
-    if (checked) {
-      if (note) {
-        noteHtml = `<div class="checkin-note-area">
-          <div class="note-preview">${note}</div>
-          <button class="note-toggle" onclick="event.stopPropagation(); openNote('${item.type}')">编辑备注</button>
-        </div>`;
-      } else {
-        noteHtml = `<div class="checkin-note-area">
-          <button class="note-toggle" onclick="event.stopPropagation(); openNote('${item.type}')">+ 备注</button>
-        </div>`;
-      }
-    }
-
-    return `<div class="checkin-item${checked ? ' checked' : ''}${detailClass}"
-         data-type="${item.type}" onclick="toggleCheckin('${item.type}')">
-      <div class="checkin-dot" style="background:${item.color}"></div>
-      <div class="checkin-info">
-        <div class="checkin-name">${item.name}</div>
-        ${detailSummary}
-        ${noteHtml}
-      </div>
-      ${arrow}
-      <div class="checkin-check">${checked ? '✓' : ''}</div>
-    </div>`;
+    html += `</div>`;
+    return html;
   }).join('');
 }
 
@@ -318,14 +362,18 @@ async function renderMonthlyStats() {
   if (useSupabase) {
     const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
     const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
-    const { data } = await sb.from('daily_checkins').select('item_type')
+    const { data } = await sb.from('daily_checkins').select('item_type, checkin_date')
       .gte('checkin_date', startDate).lte('checkin_date', endDate).eq('completed', true);
-    (data || []).forEach(row => { if (counts[row.item_type] !== undefined) counts[row.item_type]++; });
+    const dateSets = {};
+    ITEMS.forEach(item => { dateSets[item.type] = new Set(); });
+    (data || []).forEach(row => { if (dateSets[row.item_type]) dateSets[row.item_type].add(row.checkin_date); });
+    ITEMS.forEach(item => { counts[item.type] = dateSets[item.type].size; });
   } else {
     for (let d = 1; d <= daysInMonth; d++) {
       const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      Object.entries(loadLocal(ds)).forEach(([type, val]) => {
-        if (val.completed && counts[type] !== undefined) counts[type]++;
+      const local = loadLocal(ds);
+      Object.entries(local).forEach(([type, arr]) => {
+        if (Array.isArray(arr) && arr.length > 0 && counts[type] !== undefined) counts[type]++;
       });
     }
   }
@@ -347,7 +395,6 @@ async function renderMonthlyStats() {
 async function renderItemStreaks() {
   const container = document.getElementById('itemStreaks');
   const streaks = await Promise.all(ITEMS.map(item => calcItemStreak(item.type)));
-
   container.innerHTML = ITEMS.map((item, i) => `
     <div class="item-streak">
       <div class="item-streak-dot" style="background:${item.color}"></div>
@@ -386,7 +433,9 @@ async function renderTrendChart() {
 
 function renderBowelForm() {
   const form = document.getElementById('bowelForm');
-  const bowelData = dateCheckins.bowel?.details || {};
+  const records = dateCheckins.bowel || [];
+  const record = records.find(r => r.id === editingBowelId);
+  const bowelData = record?.details || {};
 
   let html = '';
   Object.entries(BOWEL_OPTIONS).forEach(([key, config]) => {
@@ -398,14 +447,24 @@ function renderBowelForm() {
       </div>
     </div>`;
   });
+
+  const note = bowelData.note || '';
+  html += `<div class="bowel-note-group">
+    <label>备注</label>
+    <textarea class="bowel-note-input" placeholder="写点备注…">${note}</textarea>
+  </div>`;
   html += `<button class="bowel-save" onclick="saveBowelDetail()">保存详情</button>`;
   form.innerHTML = html;
 }
 
 function showBowelCard() {
   const card = document.getElementById('bowelCard');
-  if (dateCheckins.bowel?.completed) { card.style.display = 'block'; renderBowelForm(); }
-  else { card.style.display = 'none'; }
+  if (editingBowelId !== null) {
+    card.style.display = 'block';
+    renderBowelForm();
+  } else {
+    card.style.display = 'none';
+  }
 }
 
 // ===== 排便趋势 =====
@@ -427,7 +486,9 @@ async function loadBowelTrend() {
   for (let i = 0; i < 30; i++) {
     const ds = getDateStr(d);
     const local = loadLocal(ds);
-    if (local.bowel?.completed && local.bowel.details) results.push(local.bowel.details);
+    (local.bowel || []).forEach(rec => {
+      if (rec.details && Object.keys(rec.details).length > 0) results.push(rec.details);
+    });
     d.setDate(d.getDate() + 1);
   }
   return results;
@@ -436,7 +497,6 @@ async function loadBowelTrend() {
 async function renderBowelTrend() {
   const container = document.getElementById('bowelTrend');
   if (!container) return;
-
   const data = await loadBowelTrend();
   if (data.length === 0) {
     container.innerHTML = '<p class="bowel-trend-empty">暂无排便数据</p>';
@@ -488,31 +548,18 @@ function showCelebration() {
 
 // ===== 交互 =====
 
-async function toggleCheckin(type) {
-  const prevDone = Object.values(dateCheckins).filter(v => v.completed).length;
-  const current = dateCheckins[type];
+async function addRecord(type) {
+  const prevDoneTypes = countDoneTypes(dateCheckins);
+  const record = await addCheckin(selectedDate, type, {});
+  if (!dateCheckins[type]) dateCheckins[type] = [];
+  dateCheckins[type].push(record);
 
   if (type === 'bowel') {
-    if (!current?.completed) {
-      dateCheckins[type] = { completed: true, details: current?.details || {} };
-      await saveCheckin(selectedDate, type, true, dateCheckins[type].details);
-    } else {
-      delete dateCheckins[type];
-      await deleteCheckin(selectedDate, type);
-    }
-    showBowelCard();
-  } else {
-    if (!current?.completed) {
-      dateCheckins[type] = { completed: true, details: {} };
-      await saveCheckin(selectedDate, type, true, {});
-    } else {
-      delete dateCheckins[type];
-      await deleteCheckin(selectedDate, type);
-    }
+    editingBowelId = record.id;
   }
 
-  const nowDone = Object.values(dateCheckins).filter(v => v.completed).length;
-  if (nowDone === ITEMS.length && prevDone < ITEMS.length) showCelebration();
+  const nowDoneTypes = countDoneTypes(dateCheckins);
+  if (nowDoneTypes === ITEMS.length && prevDoneTypes < ITEMS.length) showCelebration();
 
   renderCheckinList();
   renderOverview();
@@ -523,7 +570,37 @@ async function toggleCheckin(type) {
   renderTrendChart();
   renderBowelTrend();
   updateStreak();
+  showBowelCard();
 }
+
+async function deleteRecord(type, id) {
+  await deleteCheckinById(id, selectedDate, type);
+  if (dateCheckins[type]) {
+    dateCheckins[type] = dateCheckins[type].filter(r => r.id !== id);
+    if (dateCheckins[type].length === 0) delete dateCheckins[type];
+  }
+  if (editingBowelId === id) editingBowelId = null;
+
+  renderCheckinList();
+  renderOverview();
+  renderQuickStats();
+  renderCalendar();
+  renderMonthlyStats();
+  renderItemStreaks();
+  renderTrendChart();
+  renderBowelTrend();
+  updateStreak();
+  showBowelCard();
+}
+
+window.addRecord = addRecord;
+window.deleteRecord = deleteRecord;
+
+window.editBowelRecord = function(id) {
+  editingBowelId = id;
+  showBowelCard();
+  document.getElementById('bowelCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
 
 window.selectBowelOpt = function(key, value, el) {
   el.parentElement.querySelectorAll('.bowel-opt').forEach(o => o.classList.remove('selected'));
@@ -531,15 +608,27 @@ window.selectBowelOpt = function(key, value, el) {
 };
 
 window.saveBowelDetail = async function() {
-  const details = { ...(dateCheckins.bowel?.details || {}) };
+  if (editingBowelId === null) return;
+  const records = dateCheckins.bowel || [];
+  const record = records.find(r => r.id === editingBowelId);
+  if (!record) return;
+
+  const details = { ...(record.details || {}) };
   Object.keys(BOWEL_OPTIONS).forEach(key => {
     const group = document.querySelector(`.bowel-group[data-key="${key}"]`);
     const selected = group?.querySelector('.bowel-opt.selected');
     if (selected) details[key] = selected.textContent.trim();
   });
 
-  dateCheckins.bowel = { completed: true, details };
-  await saveCheckin(selectedDate, 'bowel', true, details);
+  const noteInput = document.querySelector('.bowel-note-input');
+  if (noteInput) {
+    const note = noteInput.value.trim();
+    if (note) details.note = note;
+    else delete details.note;
+  }
+
+  record.details = details;
+  await updateCheckinDetails(editingBowelId, selectedDate, 'bowel', details);
   renderCheckinList();
 
   const btn = document.querySelector('.bowel-save');
@@ -547,35 +636,43 @@ window.saveBowelDetail = async function() {
   setTimeout(() => { btn.textContent = '保存详情'; }, 1500);
 };
 
-window.openNote = function(type) {
-  const record = dateCheckins[type];
-  if (!record?.completed) return;
+window.openRecordNote = function(type, id) {
+  const records = dateCheckins[type] || [];
+  const record = records.find(r => r.id === id);
+  if (!record) return;
 
-  const noteArea = document.querySelector(`.checkin-item[data-type="${type}"] .checkin-note-area`);
-  if (!noteArea) return;
+  const row = document.querySelector(`.record-row[data-id="${id}"]`);
+  if (!row) return;
 
   const currentNote = record.details?.note || '';
-  noteArea.innerHTML = `<textarea class="note-input" placeholder="写点备注…" onblur="saveNote('${type}', this)">${currentNote}</textarea>`;
-  const textarea = noteArea.querySelector('.note-input');
+  const time = row.querySelector('.record-time')?.textContent || '';
+
+  row.innerHTML = `<span class="record-time">${time}</span>
+    <textarea class="record-note-input" placeholder="写点备注…" onblur="saveRecordNote('${type}', ${id}, this)">${currentNote}</textarea>
+    <button class="record-del" onclick="deleteRecord('${type}', ${id})">×</button>`;
+
+  const textarea = row.querySelector('.record-note-input');
   textarea.focus();
   textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 };
 
-window.saveNote = async function(type, el) {
+window.saveRecordNote = async function(type, id, el) {
   const note = el.value.trim();
-  const record = dateCheckins[type];
+  const records = dateCheckins[type] || [];
+  const record = records.find(r => r.id === id);
   if (!record) return;
 
   const details = { ...(record.details || {}), note };
   if (!note) delete details.note;
 
-  dateCheckins[type] = { completed: true, details };
-  await saveCheckin(selectedDate, type, true, details);
+  record.details = details;
+  await updateCheckinDetails(id, selectedDate, type, details);
   renderCheckinList();
 };
 
 window.selectDate = async function(ds) {
   selectedDate = ds;
+  editingBowelId = null;
   dateCheckins = await loadCheckins(ds);
   document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
   const el = document.querySelector(`.cal-day[data-date="${ds}"]`);
@@ -585,8 +682,6 @@ window.selectDate = async function(ds) {
   renderOverview();
   showBowelCard();
 };
-
-window.toggleCheckin = toggleCheckin;
 
 async function updateStreak() {
   document.getElementById('streakNumber').textContent = await calcStreak();
@@ -667,10 +762,8 @@ document.getElementById('sidebarOverlay').onclick = () => {
 async function init() {
   renderClock();
   setInterval(renderClock, 1000);
-
   await initSupabase();
   dateCheckins = await loadCheckins(todayStr());
-
   renderOverview();
   renderQuickStats();
   renderCheckinList();
