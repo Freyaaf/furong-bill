@@ -17,6 +17,19 @@ let state = {
 
 let allReminders = [];
 
+async function notifySync(action, id, appleId) {
+  const msg = action === 'delete' && appleId
+    ? `reminder-sync:delete:${appleId}`
+    : `reminder-sync:${action}:${id}`;
+  try {
+    await fetch('https://ntfy.sh/furong-reminder-sync', {
+      method: 'POST',
+      body: JSON.stringify({ message: msg, priority: 2 }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (e) { console.warn('ntfy:', e); }
+}
+
 // ===== Auth =====
 async function initAuth() {
   const { data } = await sb.auth.getSession();
@@ -89,13 +102,15 @@ async function quickAdd() {
   input.value = '';
 
   const cat = state.category === '全部' ? '全部' : state.category;
-  const { error } = await sb.from('reminders').insert({
+  const { data, error } = await sb.from('reminders').insert({
     title,
     category: cat,
     source: 'web',
-  });
+    synced_to_apple: false,
+  }).select('id').single();
   if (error) { toast('添加失败'); return; }
   toast('已添加');
+  notifySync('insert', data.id);
   await loadReminders();
   render();
 }
@@ -324,12 +339,13 @@ async function toggleComplete(id) {
   const update = {
     completed: newCompleted,
     completion_date: newCompleted ? new Date().toISOString() : null,
+    synced_to_apple: false,
   };
 
   if (newCompleted && r.recurrence_rule) {
     const nextDue = calcNextDue(r);
     if (nextDue) {
-      await sb.from('reminders').insert({
+      const { data: newR } = await sb.from('reminders').insert({
         title: r.title,
         notes: r.notes,
         category: r.category,
@@ -340,11 +356,14 @@ async function toggleComplete(id) {
         recurrence_interval: r.recurrence_interval,
         recurrence_weekday: r.recurrence_weekday,
         source: 'web',
-      });
+        synced_to_apple: false,
+      }).select('id').single();
+      if (newR) notifySync('insert', newR.id);
     }
   }
 
   await sb.from('reminders').update(update).eq('id', id);
+  notifySync('update', id);
   toast(newCompleted ? '完成' : '已恢复');
   await loadReminders();
   render();
@@ -475,17 +494,22 @@ async function saveForm() {
     recurrence_rule: recurrence || null,
     recurrence_weekday: weekday,
     notified: false,
+    synced_to_apple: false,
   };
 
-  let error;
+  let error, savedId;
   if (state.editingId) {
     ({ error } = await sb.from('reminders').update(row).eq('id', state.editingId));
+    savedId = state.editingId;
   } else {
     row.source = 'web';
-    ({ error } = await sb.from('reminders').insert(row));
+    const { data, error: e } = await sb.from('reminders').insert(row).select('id').single();
+    error = e;
+    if (data) savedId = data.id;
   }
 
   if (error) { toast('保存失败'); console.error(error); return; }
+  notifySync(state.editingId ? 'update' : 'insert', savedId);
   toast(state.editingId ? '已更新' : '已添加');
   closeModal();
   await loadReminders();
@@ -495,7 +519,10 @@ async function saveForm() {
 async function deleteReminder() {
   if (!state.editingId) return;
   if (!confirm('确定删除这条待办？')) return;
+  const r = allReminders.find(x => x.id === state.editingId);
+  const appleId = r?.apple_reminder_id || '';
   await sb.from('reminders').delete().eq('id', state.editingId);
+  notifySync('delete', state.editingId, appleId);
   toast('已删除');
   closeModal();
   await loadReminders();
