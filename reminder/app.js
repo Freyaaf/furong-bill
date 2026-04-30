@@ -22,11 +22,7 @@ async function notifySync(action, id, appleId) {
     ? `reminder-sync:delete:${appleId}`
     : `reminder-sync:${action}:${id}`;
   try {
-    await fetch('https://ntfy.sh/furong-reminder-sync', {
-      method: 'POST',
-      body: JSON.stringify({ message: msg, priority: 2 }),
-      headers: { 'Content-Type': 'application/json' },
-    });
+    await fetch('https://ntfy.sh/furong-reminder-sync', { method: 'POST', body: msg });
   } catch (e) { console.warn('ntfy:', e); }
 }
 
