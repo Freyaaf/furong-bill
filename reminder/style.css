@@ -372,6 +372,8 @@ select.form-list-input option { direction: ltr; }
 input[type="date"].form-list-input,
 input[type="time"].form-list-input {
   cursor: pointer;
+  -webkit-appearance: auto;
+  appearance: auto;
 }
 
 /* Buttons */
