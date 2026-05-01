@@ -225,8 +225,19 @@ window.toggleItem = async function(id, active) {
   renderCheckinList();
 };
 
-window.deleteItem = async function(id) {
-  if (!confirm('确定删除这个项目吗？（已有的打卡记录不会丢失）')) return;
+window.deleteItem = async function(id, confirmed) {
+  if (!confirmed) {
+    const btn = document.querySelector(`.delete-btn[onclick*="deleteItem(${id}"]`);
+    if (btn) {
+      btn.textContent = '确定?';
+      btn.setAttribute('onclick', `deleteItem(${id}, true)`);
+      setTimeout(() => {
+        btn.textContent = '删除';
+        btn.setAttribute('onclick', `deleteItem(${id})`);
+      }, 3000);
+    }
+    return;
+  }
   await sb.from('checkin_items').delete().eq('id', id);
   await renderSettingsItems();
   await loadItemsFromDB();
