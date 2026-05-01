@@ -606,34 +606,39 @@ async function loadBills() {
   }
   list.innerHTML = html;
 
-  list.querySelectorAll('.bill-item').forEach(el => {
+  bindBillItemEvents(list);
+}
+
+function bindBillItemEvents(container) {
+  container.querySelectorAll('.bill-item').forEach(el => {
     el.addEventListener('click', () => {
       const detail = el.querySelector('.bill-detail');
       detail.classList.toggle('open');
     });
   });
 
-  list.querySelectorAll('.btn-follow-up').forEach(btn => {
+  container.querySelectorAll('.btn-follow-up').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       openFollowUpModal(btn.dataset.id, btn.dataset.existing || '');
     });
   });
 
-  list.querySelectorAll('.btn-edit').forEach(btn => {
+  container.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       openEditModal(btn.dataset.id);
     });
   });
 
-  list.querySelectorAll('.btn-delete').forEach(btn => {
+  container.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
       if (confirm('确定删除这条记录吗？')) {
         await deleteBill(btn.dataset.id);
         toast('已删除');
         loadBills();
+        if (window._refreshSearch) window._refreshSearch();
       }
     });
   });
@@ -699,6 +704,7 @@ window.saveFollowUp = async function(id) {
     toast('追评已保存');
     closeModal();
     loadBills();
+    if (window._refreshSearch) window._refreshSearch();
   }
 };
 
@@ -782,6 +788,7 @@ window.saveEdit = async function(id, isIncome) {
     toast('已更新');
     closeModal();
     loadBills();
+    if (window._refreshSearch) window._refreshSearch();
   }
 };
 
@@ -1018,25 +1025,12 @@ function initSearch() {
     const totalAmt = results.reduce((s, b) => s + parseFloat(b.amount), 0);
     let html = `<div style="padding:8px 0;font-size:13px;color:var(--text-muted)">${results.length} 条结果 · 共 ¥${totalAmt.toFixed(2)}</div>`;
     results.forEach(b => {
-      html += `<div class="bill-item" style="cursor:default">
-        <div class="bill-row">
-          <div class="bill-left">
-            <div class="bill-name">${esc(b.item)}</div>
-            <div class="bill-meta">
-              <span class="bill-category-tag">${b.category}</span>
-              <span class="bill-sat">${satEmoji(b.satisfaction)}</span>
-              <span style="font-size:11px;color:var(--text-muted)">${formatDate(b.date)}</span>
-            </div>
-          </div>
-          <div class="bill-amount">¥${parseFloat(b.amount).toFixed(2)}</div>
-        </div>
-        ${b.reason ? `<div style="font-size:13px;color:#666;margin-top:6px">${esc(b.reason)}</div>` : ''}
-        ${b.follow_up ? `<div class="follow-up" style="margin-top:6px">
-          <div class="follow-up-label">追评</div><div>${esc(b.follow_up)}</div>
-        </div>` : ''}
-      </div>`;
+      html += `<div class="search-date-hint" style="font-size:11px;color:var(--text-muted);padding:4px 0 0">${formatDate(b.date)}</div>`;
+      html += renderBillItem(b);
     });
-    document.getElementById('search-results').innerHTML = html;
+    const container = document.getElementById('search-results');
+    container.innerHTML = html;
+    bindBillItemEvents(container);
   };
 
   document.getElementById('search-input').addEventListener('input', () => {
@@ -1045,6 +1039,7 @@ function initSearch() {
   });
   catSelect.addEventListener('change', doSearch);
   satSelect.addEventListener('change', doSearch);
+  window._refreshSearch = doSearch;
 }
 
 // ===== 预算 Tab =====
