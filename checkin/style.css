@@ -390,6 +390,18 @@ html, body {
   background: var(--lotus-root);
 }
 
+.month-picker {
+  border: 1px solid var(--lilac);
+  border-radius: 4px;
+  background: var(--moon-white);
+  color: var(--aubergine);
+  font-size: 13px;
+  font-family: inherit;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+}
+
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -1257,6 +1269,14 @@ html, body {
 
 .settings-btn:hover:not(:disabled) {
   background: var(--lotus-root);
+}
+
+.settings-btn.delete-btn {
+  color: #A64B4B;
+  border-color: #E0C9C9;
+}
+.settings-btn.delete-btn:hover {
+  background: #F5E8E8;
 }
 
 .settings-add {

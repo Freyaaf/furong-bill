@@ -203,6 +203,7 @@ async function renderSettingsItems() {
         <button class="settings-btn" onclick="moveItem(${item.id}, 'up')" ${idx === 0 ? 'disabled' : ''}>↑</button>
         <button class="settings-btn" onclick="moveItem(${item.id}, 'down')" ${idx === items.length - 1 ? 'disabled' : ''}>↓</button>
         <button class="settings-btn toggle-btn" onclick="toggleItem(${item.id}, ${item.active ? 'false' : 'true'})">${item.active ? '停用' : '启用'}</button>
+        <button class="settings-btn delete-btn" onclick="deleteItem(${item.id})">删除</button>
       </div>
     </div>
   `).join('');
@@ -218,6 +219,15 @@ window.moveItem = async function(id, direction) {
 
 window.toggleItem = async function(id, active) {
   await toggleItemActive(id, active);
+  await renderSettingsItems();
+  await loadItemsFromDB();
+  dateCheckins = await loadCheckins(selectedDate);
+  renderCheckinList();
+};
+
+window.deleteItem = async function(id) {
+  if (!confirm('确定删除这个项目吗？（已有的打卡记录不会丢失）')) return;
+  await sb.from('checkin_items').delete().eq('id', id);
   await renderSettingsItems();
   await loadItemsFromDB();
   dateCheckins = await loadCheckins(selectedDate);
@@ -535,10 +545,24 @@ function renderCheckinList() {
   }).join('');
 }
 
+function updateMonthPicker() {
+  const picker = document.getElementById('monthPicker');
+  const now = new Date();
+  const currentVal = `${calendarMonth.getFullYear()}-${calendarMonth.getMonth()}`;
+  let html = '';
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${d.getMonth()}`;
+    const label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+    html += `<option value="${val}" ${val === currentVal ? 'selected' : ''}>${label}</option>`;
+  }
+  picker.innerHTML = html;
+}
+
 async function renderCalendar() {
   const year = calendarMonth.getFullYear();
   const month = calendarMonth.getMonth();
-  document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
+  updateMonthPicker();
   monthData = await loadMonthData(year, month);
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -989,6 +1013,13 @@ document.getElementById('prevMonth').onclick = () => {
 
 document.getElementById('nextMonth').onclick = () => {
   calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+  renderCalendar();
+  renderMonthlyStats();
+};
+
+document.getElementById('monthPicker').onchange = (e) => {
+  const [y, m] = e.target.value.split('-').map(Number);
+  calendarMonth = new Date(y, m, 1);
   renderCalendar();
   renderMonthlyStats();
 };
