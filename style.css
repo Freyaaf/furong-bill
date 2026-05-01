@@ -461,7 +461,8 @@ html, body {
 .search-filters {
   display: flex; gap: 8px; margin-bottom: 12px;
 }
-.search-filters select {
+.search-filters select,
+.search-filters input[type="month"] {
   flex: 1; padding: 8px 10px;
   border: 1px solid var(--lilac); border-radius: var(--radius);
   font-size: 13px; color: var(--ink); background: var(--paper);

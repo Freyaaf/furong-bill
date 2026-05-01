@@ -210,13 +210,15 @@ async function upsertBudget(ym, category, amount) {
   }
 }
 
-async function searchBills(query, category, satisfaction) {
+async function searchBills(query, category, satisfaction, startDate, endDate) {
   let q = sb.from('bills').select('*').order('date', { ascending: false });
   if (query) {
     q = q.or(`item.ilike.%${query}%,reason.ilike.%${query}%,follow_up.ilike.%${query}%`);
   }
   if (category) q = q.eq('category', category);
   if (satisfaction) q = q.eq('satisfaction', satisfaction);
+  if (startDate) q = q.gte('date', startDate);
+  if (endDate) q = q.lte('date', endDate);
   const { data, error } = await q.limit(100);
   if (error) { console.error(error); return []; }
   return data || [];
@@ -1007,27 +1009,59 @@ function initSearch() {
     satSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
   });
 
+  const monthInput = document.getElementById('search-month');
+
   let timer;
   const doSearch = async () => {
     const query = document.getElementById('search-input').value.trim();
     const cat = catSelect.value;
     const sat = satSelect.value;
-    if (!query && !cat && !sat) {
-      document.getElementById('search-results').innerHTML = '<div class="search-hint">输入关键词，或选择类别/满足感筛选</div>';
+    const monthVal = monthInput.value;
+    if (!query && !cat && !sat && !monthVal) {
+      document.getElementById('search-results').innerHTML = '<div class="search-hint">输入关键词，或选择类别/满足感/月份筛选</div>';
       return;
     }
+    let startDate = null, endDate = null;
+    if (monthVal) {
+      startDate = `${monthVal}-01`;
+      endDate = `${monthVal}-${lastDayOfMonth(monthVal)}`;
+    }
     document.getElementById('search-results').innerHTML = '<div class="loading">搜索中...</div>';
-    const results = await searchBills(query, cat, sat);
+    const results = await searchBills(query, cat, sat, startDate, endDate);
     if (results.length === 0) {
       document.getElementById('search-results').innerHTML = '<div class="search-hint">没找到</div>';
       return;
     }
-    const totalAmt = results.reduce((s, b) => s + parseFloat(b.amount), 0);
-    let html = `<div style="padding:8px 0;font-size:13px;color:var(--text-muted)">${results.length} 条结果 · 共 ¥${totalAmt.toFixed(2)}</div>`;
+    const expenseAmt = results.filter(b => b.type !== 'income').reduce((s, b) => s + parseFloat(b.amount), 0);
+    const incomeAmt = results.filter(b => b.type === 'income').reduce((s, b) => s + parseFloat(b.amount), 0);
+    let summaryText = `${results.length} 条结果`;
+    if (incomeAmt > 0 && expenseAmt > 0) {
+      summaryText += ` · 支出 ¥${expenseAmt.toFixed(2)} · 收入 ¥${incomeAmt.toFixed(2)}`;
+    } else if (incomeAmt > 0) {
+      summaryText += ` · 收入 ¥${incomeAmt.toFixed(2)}`;
+    } else {
+      summaryText += ` · 支出 ¥${expenseAmt.toFixed(2)}`;
+    }
+    let html = `<div style="padding:8px 0;font-size:13px;color:var(--text-muted)">${summaryText}</div>`;
+
+    // 按日期分组
+    const grouped = {};
     results.forEach(b => {
-      html += `<div class="search-date-hint" style="font-size:11px;color:var(--text-muted);padding:4px 0 0">${formatDate(b.date)}</div>`;
-      html += renderBillItem(b);
+      if (!grouped[b.date]) grouped[b.date] = [];
+      grouped[b.date].push(b);
     });
+    const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+    for (const date of sortedDates) {
+      const items = grouped[date];
+      const dayTotal = items.reduce((s, b) => s + parseFloat(b.amount), 0);
+      html += `<div class="date-group">
+        <div class="date-header">${formatDate(date)} ${weekday(date)} · ¥${dayTotal.toFixed(2)}</div>`;
+      for (const b of items) {
+        html += renderBillItem(b);
+      }
+      html += '</div>';
+    }
+
     const container = document.getElementById('search-results');
     container.innerHTML = html;
     bindBillItemEvents(container);
@@ -1039,6 +1073,7 @@ function initSearch() {
   });
   catSelect.addEventListener('change', doSearch);
   satSelect.addEventListener('change', doSearch);
+  monthInput.addEventListener('change', doSearch);
   window._refreshSearch = doSearch;
 }
 

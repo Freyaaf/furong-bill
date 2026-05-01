@@ -76,6 +76,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <span class="logo-text">琳琳的打卡</span>
+        <button class="settings-gear" onclick="openSettings()" title="设置">⚙</button>
         <p class="motto">我帮你记着呢</p>
       </div>
 
@@ -101,6 +102,10 @@
       <div class="streak-block">
         <div class="streak-number" id="streakNumber">0</div>
         <div class="streak-label">连续全勤</div>
+        <div class="longest-streak">
+          <span class="longest-streak-number" id="longestStreakNumber">0</span>
+          <span class="longest-streak-label">天 · 最长纪录</span>
+        </div>
       </div>
     </aside>
 
@@ -161,6 +166,27 @@
         <button class="export-btn" id="exportBtn" onclick="exportData()">导出数据</button>
       </div>
     </main>
+  </div>
+
+  <!-- 设置面板 -->
+  <div class="settings-panel" id="settingsPanel" style="display:none;">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h2>打卡项目设置</h2>
+        <button class="settings-close" onclick="closeSettings()">&times;</button>
+      </div>
+      <div class="settings-body">
+        <div id="settingsItemList"></div>
+        <div class="settings-add">
+          <input type="text" id="newItemName" placeholder="新项目名称" class="settings-add-input">
+          <input type="color" id="newItemColor" value="#A896B8" class="settings-add-color">
+          <button class="settings-add-btn" onclick="addNewItem()">添加</button>
+        </div>
+      </div>
+      <div class="settings-footer">
+        <button class="settings-apply-btn" onclick="applySettings()">应用并关闭</button>
+      </div>
+    </div>
   </div>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>

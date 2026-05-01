@@ -294,10 +294,29 @@ function renderItem(r, isDone) {
     const pc = r.priority >= 9 ? 'p-high' : r.priority >= 5 ? 'p-mid' : 'p-low';
     meta += `<span class="meta-tag meta-priority ${pc}">${PRIORITY_LABELS[r.priority] || ''}</span>`;
   }
+  // 子任务进度
+  const subtasks = r.subtasks || [];
+  if (subtasks.length > 0) {
+    const doneCount = subtasks.filter(s => s.completed).length;
+    meta += `<span class="meta-tag meta-subtasks">${doneCount}/${subtasks.length}</span>`;
+  }
 
   let notes = '';
   if (r.notes) {
     notes = `<div class="meta-notes">${escHtml(r.notes)}</div>`;
+  }
+
+  // 子任务列表（可直接勾选）
+  let subtasksHtml = '';
+  if (subtasks.length > 0) {
+    subtasksHtml = `<div class="subtask-list" data-reminder-id="${r.id}">`;
+    subtasks.forEach(st => {
+      subtasksHtml += `<div class="subtask-item ${st.completed ? 'completed' : ''}" data-subtask-id="${st.id}">
+        <div class="subtask-check ${st.completed ? 'checked' : ''}" data-action="toggle-subtask" data-reminder-id="${r.id}" data-subtask-id="${st.id}"></div>
+        <span class="subtask-title">${escHtml(st.title)}</span>
+      </div>`;
+    });
+    subtasksHtml += '</div>';
   }
 
   const itemCls = [
@@ -313,6 +332,7 @@ function renderItem(r, isDone) {
       <div class="reminder-title">${escHtml(r.title)}</div>
       ${meta ? `<div class="reminder-meta">${meta}</div>` : ''}
       ${notes}
+      ${subtasksHtml}
     </div>
   </div>`;
 }
@@ -324,6 +344,23 @@ function bindItemEvents(container) {
   container.querySelectorAll('[data-action="edit"]').forEach(el => {
     el.onclick = () => openEdit(+el.dataset.id);
   });
+  container.querySelectorAll('[data-action="toggle-subtask"]').forEach(el => {
+    el.onclick = e => {
+      e.stopPropagation();
+      toggleSubtask(+el.dataset.reminderId, el.dataset.subtaskId);
+    };
+  });
+}
+
+async function toggleSubtask(reminderId, subtaskId) {
+  const r = allReminders.find(x => x.id === reminderId);
+  if (!r || !r.subtasks) return;
+  const subtasks = r.subtasks.map(st =>
+    st.id === subtaskId ? { ...st, completed: !st.completed } : st
+  );
+  r.subtasks = subtasks;
+  await sb.from('reminders').update({ subtasks, synced_to_apple: false }).eq('id', reminderId);
+  render();
 }
 
 // ===== Toggle Complete =====
@@ -415,6 +452,7 @@ function openAdd() {
   document.getElementById('weekday-row').classList.add('hidden');
 
   populateCategorySelect(state.category === '全部' ? '全部' : state.category);
+  renderSubtasksEditor([]);
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
@@ -447,12 +485,69 @@ function openEdit(id) {
   document.getElementById('weekday-row').classList.toggle('hidden', r.recurrence_rule !== 'weekly');
 
   populateCategorySelect(r.category || '全部');
+  renderSubtasksEditor(r.subtasks || []);
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.add('hidden');
 }
+
+// ===== Subtasks Editor =====
+let editingSubtasks = [];
+
+function renderSubtasksEditor(subtasks) {
+  editingSubtasks = subtasks ? subtasks.map(s => ({ ...s })) : [];
+  const container = document.getElementById('subtasks-editor');
+  if (!container) return;
+  updateSubtasksEditorUI();
+}
+
+function updateSubtasksEditorUI() {
+  const container = document.getElementById('subtasks-editor');
+  let html = '';
+  editingSubtasks.forEach(st => {
+    html += `<div class="subtask-edit-item" data-id="${st.id}">
+      <div class="subtask-edit-check ${st.completed ? 'checked' : ''}" onclick="toggleEditSubtask('${st.id}')"></div>
+      <input type="text" class="subtask-edit-input" value="${escHtml(st.title)}" onchange="updateSubtaskTitle('${st.id}', this.value)">
+      <button class="subtask-edit-del" onclick="removeSubtask('${st.id}')">&times;</button>
+    </div>`;
+  });
+  html += `<div class="subtask-add-row">
+    <input type="text" id="subtask-new-input" class="subtask-add-input" placeholder="添加子任务…" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtaskFromInput();}">
+    <button class="subtask-add-btn" onclick="addSubtaskFromInput()">+</button>
+  </div>`;
+  container.innerHTML = html;
+}
+
+window.toggleEditSubtask = function(id) {
+  const st = editingSubtasks.find(s => s.id === id);
+  if (st) st.completed = !st.completed;
+  updateSubtasksEditorUI();
+};
+
+window.updateSubtaskTitle = function(id, title) {
+  const st = editingSubtasks.find(s => s.id === id);
+  if (st) st.title = title;
+};
+
+window.removeSubtask = function(id) {
+  editingSubtasks = editingSubtasks.filter(s => s.id !== id);
+  updateSubtasksEditorUI();
+};
+
+window.addSubtaskFromInput = function() {
+  const input = document.getElementById('subtask-new-input');
+  const title = input.value.trim();
+  if (!title) return;
+  editingSubtasks.push({
+    id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    title,
+    completed: false,
+  });
+  input.value = '';
+  updateSubtasksEditorUI();
+};
 
 function populateCategorySelect(selected) {
   const sel = document.getElementById('form-category-select');
@@ -484,11 +579,15 @@ async function saveForm() {
     ? parseInt(document.getElementById('form-weekday-select').value || '1')
     : null;
 
+  // 收集子任务（过滤掉空标题的）
+  const subtasks = editingSubtasks.filter(s => s.title && s.title.trim());
+
   const row = {
     title, category, priority, notes,
     due_date, remind_at,
     recurrence_rule: recurrence || null,
     recurrence_weekday: weekday,
+    subtasks: subtasks.length > 0 ? subtasks : null,
     notified: false,
     synced_to_apple: false,
   };
