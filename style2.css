@@ -348,6 +348,8 @@ html, body {
   cursor: pointer; transition: all 0.2s;
 }
 .bill-item:active { background: var(--moon-white); }
+.bill-item.sortable-ghost { opacity: 0.4; }
+.bill-item.sortable-drag { box-shadow: 0 4px 12px rgba(92,78,110,.15); }
 .bill-row {
   display: flex; align-items: center; justify-content: space-between;
 }

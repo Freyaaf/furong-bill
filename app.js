@@ -147,7 +147,7 @@ async function fetchBills(ym) {
   const end = `${ym}-${lastDayOfMonth(ym)}`;
   const { data, error } = await sb.from('bills').select('*')
     .gte('date', start).lte('date', end)
-    .order('date').order('created_at');
+    .order('date').order('sort_order', { ascending: true }).order('created_at');
   if (error) { toast('加载失败'); console.error(error); return []; }
   return data || [];
 }
@@ -609,6 +609,19 @@ async function loadBills() {
   list.innerHTML = html;
 
   bindBillItemEvents(list);
+
+  list.querySelectorAll('.date-group').forEach(group => {
+    new Sortable(group, {
+      draggable: '.bill-item',
+      delay: 300,
+      delayOnTouchOnly: true,
+      animation: 150,
+      onEnd: async function() {
+        const ids = Array.from(group.querySelectorAll('.bill-item')).map(el => +el.dataset.id);
+        await Promise.all(ids.map((id, i) => sb.from('bills').update({ sort_order: i + 1 }).eq('id', id)));
+      }
+    });
+  });
 }
 
 function bindBillItemEvents(container) {
