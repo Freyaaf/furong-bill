@@ -232,8 +232,30 @@ function renderTodo() {
   }
   empty.classList.add('hidden');
 
+  const now = new Date();
   let html = '';
-  items.forEach(r => { html += renderItem(r, false); });
+  let lastGroup = '';
+  items.forEach(r => {
+    let group = '';
+    if (r.due_date) {
+      const d = new Date(r.due_date);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const due = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const diff = Math.floor((due - today) / 86400000);
+      if (diff < 0) group = '已过期';
+      else if (diff === 0) group = '今天';
+      else if (diff === 1) group = '明天';
+      else if (diff <= 7) group = '本周内';
+      else group = '以后';
+    } else {
+      group = '无日期';
+    }
+    if (group !== lastGroup) {
+      html += `<div class="date-group-label">${group}</div>`;
+      lastGroup = group;
+    }
+    html += renderItem(r, false);
+  });
 
   list.innerHTML = html;
   bindItemEvents(list);
@@ -731,7 +753,7 @@ function updateNotifBtn() {
 let notifTimer = null;
 function startNotifLoop() {
   if (notifTimer) return;
-  notifTimer = setInterval(checkAndNotify, 60 * 1000);
+  notifTimer = setInterval(checkAndNotify, 10 * 60 * 1000);
 }
 
 // ===== Start =====
