@@ -96,6 +96,19 @@ function lastDayOfMonth(ym) {
   return new Date(y, m, 0).getDate();
 }
 
+function populateMonthSelect(selectId, selectedYM) {
+  const sel = document.getElementById(selectId);
+  const current = todayYM();
+  const start = '2024-10';
+  const options = [];
+  let ym = current;
+  while (ym >= start) {
+    options.push(ym);
+    ym = shiftMonth(ym, -1);
+  }
+  sel.innerHTML = options.map(m => `<option value="${m}" ${m === selectedYM ? 'selected' : ''}>${formatYM(m)}</option>`).join('');
+}
+
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
@@ -537,8 +550,7 @@ function initAddForm() {
 
 // ===== 账单 Tab =====
 async function loadBills() {
-  const label = document.getElementById('bills-month-label');
-  label.textContent = formatYM(state.billsMonth);
+  populateMonthSelect('bills-month-select', state.billsMonth);
   const list = document.getElementById('bills-list');
   list.innerHTML = '<div class="loading">加载中...</div>';
   const allBills = await fetchBills(state.billsMonth);
@@ -809,7 +821,7 @@ window.saveEdit = async function(id, isIncome) {
 // ===== 总结 Tab =====
 async function loadSummary() {
   const ym = state.summaryMonth;
-  document.getElementById('summary-month-label').textContent = formatYM(ym);
+  populateMonthSelect('summary-month-select', ym);
   const container = document.getElementById('summary-content');
   container.innerHTML = '<div class="loading">生成总结中...</div>';
 
@@ -1229,12 +1241,20 @@ function init() {
     state.billsMonth = shiftMonth(state.billsMonth, 1);
     loadBills();
   });
+  document.getElementById('bills-month-select').addEventListener('change', (e) => {
+    state.billsMonth = e.target.value;
+    loadBills();
+  });
   document.getElementById('summary-prev').addEventListener('click', () => {
     state.summaryMonth = shiftMonth(state.summaryMonth, -1);
     loadSummary();
   });
   document.getElementById('summary-next').addEventListener('click', () => {
     state.summaryMonth = shiftMonth(state.summaryMonth, 1);
+    loadSummary();
+  });
+  document.getElementById('summary-month-select').addEventListener('change', (e) => {
+    state.summaryMonth = e.target.value;
     loadSummary();
   });
 
