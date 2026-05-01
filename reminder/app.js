@@ -64,6 +64,11 @@ async function init() {
   await loadReminders();
   renderCategoryBar();
   render();
+  updateNotifBtn();
+  if ('Notification' in window && Notification.permission === 'granted') {
+    checkAndNotify();
+    startNotifLoop();
+  }
 }
 
 // ===== Nav =====
@@ -682,6 +687,51 @@ function toast(msg) {
   el.classList.remove('hidden');
   el.classList.add('visible');
   setTimeout(() => { el.classList.remove('visible'); el.classList.add('hidden'); }, 1800);
+}
+
+// ===== 桌面提醒 =====
+async function checkAndNotify() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = new Date().toISOString();
+  const { data } = await sb.from('reminders')
+    .select('id, title, notes, due_date, remind_at')
+    .eq('completed', false)
+    .eq('notified', false)
+    .not('remind_at', 'is', null)
+    .lte('remind_at', now);
+  if (!data || data.length === 0) return;
+  data.forEach(r => {
+    new Notification('📌 ' + r.title, {
+      body: r.notes || formatDue(r.remind_at),
+      tag: 'reminder-' + r.id,
+    });
+  });
+  await Promise.all(data.map(r => sb.from('reminders').update({ notified: true }).eq('id', r.id)));
+}
+
+window.requestNotifPermission = async function() {
+  if (!('Notification' in window)) { toast('浏览器不支持桌面通知'); return; }
+  if (Notification.permission === 'denied') { toast('通知被拒绝，请在浏览器设置中开启'); return; }
+  if (Notification.permission === 'granted') { toast('提醒已开启'); return; }
+  const result = await Notification.requestPermission();
+  updateNotifBtn();
+  if (result === 'granted') { checkAndNotify(); startNotifLoop(); }
+};
+
+function updateNotifBtn() {
+  const btn = document.getElementById('notif-btn');
+  if (!btn) return;
+  if (!('Notification' in window) || Notification.permission === 'denied') {
+    btn.classList.add('disabled');
+  } else if (Notification.permission === 'granted') {
+    btn.classList.add('active');
+  }
+}
+
+let notifTimer = null;
+function startNotifLoop() {
+  if (notifTimer) return;
+  notifTimer = setInterval(checkAndNotify, 60 * 1000);
 }
 
 // ===== Start =====

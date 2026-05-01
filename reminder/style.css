@@ -54,6 +54,13 @@ html, body {
   border-bottom: 1px solid var(--lotus-root);
   z-index: 100;
 }
+.notif-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  opacity: 0.4; transition: opacity 0.2s;
+}
+.notif-btn.active { opacity: 1; }
+.notif-btn.disabled { opacity: 0.2; cursor: default; }
 .app-header h1 {
   font-size: 17px; font-weight: bold;
   color: var(--ink); letter-spacing: 0.25em;
