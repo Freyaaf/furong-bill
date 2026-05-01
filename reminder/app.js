@@ -66,8 +66,7 @@ async function init() {
   render();
   updateNotifBtn();
   if ('Notification' in window && Notification.permission === 'granted') {
-    checkAndNotify();
-    startNotifLoop();
+    scheduleNextNotify();
   }
 }
 
@@ -649,6 +648,7 @@ async function saveForm() {
   closeModal();
   await loadReminders();
   render();
+  scheduleNextNotify();
 }
 
 async function deleteReminder() {
@@ -712,23 +712,42 @@ function toast(msg) {
 }
 
 // ===== 桌面提醒 =====
-async function checkAndNotify() {
+let notifTimer = null;
+
+async function scheduleNextNotify() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const now = new Date().toISOString();
-  const { data } = await sb.from('reminders')
-    .select('id, title, notes, due_date, remind_at')
+  if (notifTimer) { clearTimeout(notifTimer); notifTimer = null; }
+
+  const now = new Date();
+  const nowISO = now.toISOString();
+
+  // 先弹出已到期的
+  const { data: due } = await sb.from('reminders')
+    .select('id, title, notes, remind_at')
     .eq('completed', false)
     .eq('notified', false)
     .not('remind_at', 'is', null)
-    .lte('remind_at', now);
-  if (!data || data.length === 0) return;
-  data.forEach(r => {
-    new Notification('📌 ' + r.title, {
-      body: r.notes || formatDue(r.remind_at),
-      tag: 'reminder-' + r.id,
+    .lte('remind_at', nowISO);
+  if (due && due.length > 0) {
+    due.forEach(r => {
+      new Notification('📌 ' + r.title, { body: r.notes || formatDue(r.remind_at), tag: 'reminder-' + r.id });
     });
-  });
-  await Promise.all(data.map(r => sb.from('reminders').update({ notified: true }).eq('id', r.id)));
+    await Promise.all(due.map(r => sb.from('reminders').update({ notified: true }).eq('id', r.id)));
+  }
+
+  // 找下一条最近的未到期提醒，设定时器
+  const { data: next } = await sb.from('reminders')
+    .select('id, remind_at')
+    .eq('completed', false)
+    .eq('notified', false)
+    .not('remind_at', 'is', null)
+    .gt('remind_at', nowISO)
+    .order('remind_at', { ascending: true })
+    .limit(1);
+  if (next && next.length > 0) {
+    const ms = new Date(next[0].remind_at) - now;
+    notifTimer = setTimeout(scheduleNextNotify, Math.max(ms, 1000));
+  }
 }
 
 window.requestNotifPermission = async function() {
@@ -737,7 +756,7 @@ window.requestNotifPermission = async function() {
   if (Notification.permission === 'granted') { toast('提醒已开启'); return; }
   const result = await Notification.requestPermission();
   updateNotifBtn();
-  if (result === 'granted') { checkAndNotify(); startNotifLoop(); }
+  if (result === 'granted') scheduleNextNotify();
 };
 
 function updateNotifBtn() {
@@ -748,12 +767,6 @@ function updateNotifBtn() {
   } else if (Notification.permission === 'granted') {
     btn.classList.add('active');
   }
-}
-
-let notifTimer = null;
-function startNotifLoop() {
-  if (notifTimer) return;
-  notifTimer = setInterval(checkAndNotify, 10 * 60 * 1000);
 }
 
 // ===== Start =====
