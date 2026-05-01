@@ -219,6 +219,9 @@ window.moveItem = async function(id, direction) {
 window.toggleItem = async function(id, active) {
   await toggleItemActive(id, active);
   await renderSettingsItems();
+  await loadItemsFromDB();
+  dateCheckins = await loadCheckins(selectedDate);
+  renderCheckinList();
 };
 
 window.addNewItem = async function() {
@@ -229,6 +232,10 @@ window.addNewItem = async function() {
   await saveNewItem(name, colorInput.value);
   nameInput.value = '';
   await renderSettingsItems();
+  // 立刻刷新主页面
+  await loadItemsFromDB();
+  dateCheckins = await loadCheckins(selectedDate);
+  renderCheckinList();
 };
 
 window.applySettings = async function() {

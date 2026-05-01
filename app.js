@@ -1009,14 +1009,25 @@ function initSearch() {
     satSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
   });
 
-  const monthInput = document.getElementById('search-month');
+  const monthSelect = document.getElementById('search-month');
+  // 从数据库加载有记录的月份
+  (async () => {
+    const { data } = await sb.from('bills').select('date').order('date', { ascending: false });
+    if (data) {
+      const months = [...new Set(data.map(b => b.date.slice(0, 7)))];
+      months.forEach(m => {
+        const [y, mo] = m.split('-');
+        monthSelect.innerHTML += `<option value="${m}">${y}年${parseInt(mo)}月</option>`;
+      });
+    }
+  })();
 
   let timer;
   const doSearch = async () => {
     const query = document.getElementById('search-input').value.trim();
     const cat = catSelect.value;
     const sat = satSelect.value;
-    const monthVal = monthInput.value;
+    const monthVal = monthSelect.value;
     if (!query && !cat && !sat && !monthVal) {
       document.getElementById('search-results').innerHTML = '<div class="search-hint">输入关键词，或选择类别/满足感/月份筛选</div>';
       return;
@@ -1073,7 +1084,7 @@ function initSearch() {
   });
   catSelect.addEventListener('change', doSearch);
   satSelect.addEventListener('change', doSearch);
-  monthInput.addEventListener('change', doSearch);
+  monthSelect.addEventListener('change', doSearch);
   window._refreshSearch = doSearch;
 }
 
