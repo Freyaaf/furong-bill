@@ -97,7 +97,7 @@ async function quickAdd() {
   if (!title) return;
   input.value = '';
 
-  const cat = state.category === '全部' ? '全部' : state.category;
+  const cat = state.category === '全部' ? '日常' : state.category;
   const { data, error } = await sb.from('reminders').insert({
     title,
     category: cat,

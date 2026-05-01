@@ -138,19 +138,6 @@ async function toggleItemActive(id, active) {
   await sb.from('checkin_items').update({ active }).eq('id', id);
 }
 
-async function reorderItem(id, direction) {
-  if (!useSupabase) return;
-  const items = await loadAllItemsForSettings();
-  const idx = items.findIndex(i => i.id === id);
-  if (idx < 0) return;
-  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-  if (swapIdx < 0 || swapIdx >= items.length) return;
-  // 交换 sort_order
-  const orderA = items[idx].sort_order;
-  const orderB = items[swapIdx].sort_order;
-  await sb.from('checkin_items').update({ sort_order: orderB }).eq('id', items[idx].id);
-  await sb.from('checkin_items').update({ sort_order: orderA }).eq('id', items[swapIdx].id);
-}
 
 async function initItemsTable() {
   // 如果表为空，用默认值初始化
@@ -223,10 +210,6 @@ async function renderSettingsItems() {
 window.openSettings = openSettings;
 window.closeSettings = closeSettings;
 
-window.moveItem = async function(id, direction) {
-  await reorderItem(id, direction);
-  await renderSettingsItems();
-};
 
 
 window.toggleItem = async function(id, active) {
@@ -574,6 +557,7 @@ function renderCheckinList() {
     delayOnTouchOnly: true,
     animation: 150,
     onEnd: async function() {
+      if (!useSupabase) return;
       const types = Array.from(container.querySelectorAll('.checkin-group')).map(el => el.dataset.type);
       const allItems = await loadAllItemsForSettings();
       await Promise.all(types.map((type, i) => {

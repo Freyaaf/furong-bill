@@ -69,7 +69,6 @@ let state = {
   billsCategory: '',
 };
 
-let chartInstance = null;
 let catChartInstance = null;
 
 function todayYM() {
