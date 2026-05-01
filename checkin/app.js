@@ -519,7 +519,7 @@ function renderCheckinList() {
     const count = records.length;
     const checked = count > 0;
 
-    let html = `<div class="checkin-group">
+    let html = `<div class="checkin-group" data-type="${item.type}">
       <div class="checkin-item${checked ? ' checked' : ''}" onclick="addRecord('${item.type}')">
         <div class="checkin-dot" style="background:${item.color}"></div>
         <div class="checkin-info"><div class="checkin-name">${item.name}</div></div>
@@ -566,6 +566,23 @@ function renderCheckinList() {
     html += `</div>`;
     return html;
   }).join('');
+
+  if (window._checkinSortable) window._checkinSortable.destroy();
+  window._checkinSortable = new Sortable(container, {
+    draggable: '.checkin-group',
+    delay: 300,
+    delayOnTouchOnly: true,
+    animation: 150,
+    onEnd: async function() {
+      const types = Array.from(container.querySelectorAll('.checkin-group')).map(el => el.dataset.type);
+      const allItems = await loadAllItemsForSettings();
+      await Promise.all(types.map((type, i) => {
+        const item = allItems.find(it => it.type === type);
+        if (item) return sb.from('checkin_items').update({ sort_order: i + 1 }).eq('id', item.id);
+      }));
+      await loadItemsFromDB();
+    }
+  });
 }
 
 function updateMonthPicker() {

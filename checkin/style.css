@@ -468,6 +468,8 @@ html, body {
 .checkin-group {
   margin-bottom: 8px;
 }
+.checkin-group.sortable-ghost { opacity: 0.4; }
+.checkin-group.sortable-drag { box-shadow: 0 4px 12px rgba(92,78,110,.12); border-radius: 8px; }
 
 .checkin-item {
   display: flex;
