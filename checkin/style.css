@@ -1227,6 +1227,34 @@ html, body {
   gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid var(--lotus-root);
+  transition: box-shadow 0.15s, opacity 0.15s;
+}
+
+.settings-item.sortable-ghost {
+  opacity: 0.4;
+  background: var(--moon-white);
+}
+
+.settings-item.sortable-drag {
+  background: var(--surface);
+  box-shadow: 0 4px 16px rgba(92, 78, 110, 0.18);
+  border-radius: 6px;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--smoke);
+  font-size: 14px;
+  padding: 4px 2px;
+  user-select: none;
+  -webkit-user-select: none;
+  letter-spacing: -1px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .settings-item.inactive {

@@ -195,18 +195,29 @@ async function renderSettingsItems() {
     return;
   }
 
-  container.innerHTML = items.map((item, idx) => `
-    <div class="settings-item ${item.active ? '' : 'inactive'}">
+  container.innerHTML = items.map(item => `
+    <div class="settings-item ${item.active ? '' : 'inactive'}" data-id="${item.id}">
+      <span class="drag-handle">⋮⋮</span>
       <div class="settings-item-dot" style="background:${item.color}"></div>
       <span class="settings-item-name">${item.name}</span>
       <div class="settings-item-actions">
-        <button class="settings-btn" onclick="moveItem(${item.id}, 'up')" ${idx === 0 ? 'disabled' : ''}>↑</button>
-        <button class="settings-btn" onclick="moveItem(${item.id}, 'down')" ${idx === items.length - 1 ? 'disabled' : ''}>↓</button>
         <button class="settings-btn toggle-btn" onclick="toggleItem(${item.id}, ${item.active ? 'false' : 'true'})">${item.active ? '停用' : '启用'}</button>
         <button class="settings-btn delete-btn" onclick="deleteItem(${item.id})">删除</button>
       </div>
     </div>
   `).join('');
+
+  if (window._settingsSortable) window._settingsSortable.destroy();
+  window._settingsSortable = new Sortable(container, {
+    handle: '.drag-handle',
+    delay: 200,
+    delayOnTouchOnly: true,
+    animation: 150,
+    onEnd: async function() {
+      const ids = Array.from(container.querySelectorAll('.settings-item')).map(el => +el.dataset.id);
+      await Promise.all(ids.map((id, i) => sb.from('checkin_items').update({ sort_order: i + 1 }).eq('id', id)));
+    }
+  });
 }
 
 window.openSettings = openSettings;
@@ -216,6 +227,7 @@ window.moveItem = async function(id, direction) {
   await reorderItem(id, direction);
   await renderSettingsItems();
 };
+
 
 window.toggleItem = async function(id, active) {
   await toggleItemActive(id, active);

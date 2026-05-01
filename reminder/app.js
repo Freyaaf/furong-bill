@@ -115,6 +115,7 @@ async function quickAdd() {
 async function loadReminders() {
   const { data, error } = await sb.from('reminders')
     .select('*')
+    .order('sort_order', { ascending: true, nullsFirst: true })
     .order('due_date', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
@@ -148,13 +149,23 @@ function getFiltered(completed) {
   }
 
   if (!completed) {
-    items.sort((a, b) => {
-      if (a.priority !== b.priority) return b.priority - a.priority;
-      if (a.due_date && !b.due_date) return -1;
-      if (!a.due_date && b.due_date) return 1;
-      if (a.due_date && b.due_date) return new Date(a.due_date) - new Date(b.due_date);
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
+    const hasSortOrder = items.some(r => r.sort_order != null);
+    if (hasSortOrder) {
+      items.sort((a, b) => {
+        const sa = a.sort_order ?? 999999;
+        const sb2 = b.sort_order ?? 999999;
+        if (sa !== sb2) return sa - sb2;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+    } else {
+      items.sort((a, b) => {
+        if (a.priority !== b.priority) return b.priority - a.priority;
+        if (a.due_date && !b.due_date) return -1;
+        if (!a.due_date && b.due_date) return 1;
+        if (a.due_date && b.due_date) return new Date(a.due_date) - new Date(b.due_date);
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+    }
   } else {
     items.sort((a, b) => {
       const da = a.completion_date || a.updated_at;
@@ -211,32 +222,33 @@ function renderTodo() {
   if (items.length === 0) {
     list.innerHTML = '';
     empty.classList.remove('hidden');
+    if (window._todoSortable) { window._todoSortable.destroy(); window._todoSortable = null; }
     return;
   }
   empty.classList.add('hidden');
 
-  const dated = items.filter(r => r.due_date);
-  const undated = items.filter(r => !r.due_date);
-
   let html = '';
-  let lastGroup = '';
-
-  dated.forEach(r => {
-    const group = getMonthKey(r.due_date);
-    if (group !== lastGroup) {
-      html += `<div class="date-group-label">${group}</div>`;
-      lastGroup = group;
-    }
-    html += renderItem(r, false);
-  });
-
-  if (undated.length > 0) {
-    html += `<div class="date-group-label">长期 / 无日期</div>`;
-    undated.forEach(r => { html += renderItem(r, false); });
-  }
+  items.forEach(r => { html += renderItem(r, false); });
 
   list.innerHTML = html;
   bindItemEvents(list);
+
+  if (window._todoSortable) window._todoSortable.destroy();
+  window._todoSortable = new Sortable(list, {
+    handle: '.drag-handle',
+    delay: 300,
+    delayOnTouchOnly: true,
+    animation: 150,
+    draggable: '.reminder-item',
+    onEnd: async function() {
+      const ids = Array.from(list.querySelectorAll('.reminder-item')).map(el => +el.dataset.id);
+      await Promise.all(ids.map((id, i) => sb.from('reminders').update({ sort_order: i + 1 }).eq('id', id)));
+      allReminders.forEach(r => {
+        const idx = ids.indexOf(r.id);
+        if (idx >= 0) r.sort_order = idx + 1;
+      });
+    }
+  });
 }
 
 function renderDone() {
@@ -327,6 +339,7 @@ function renderItem(r, isDone) {
   ].filter(Boolean).join(' ');
 
   return `<div class="${itemCls}" data-id="${r.id}">
+    ${!isDone ? '<span class="drag-handle">⋮⋮</span>' : ''}
     <div class="reminder-check ${isDone ? 'checked' : ''}" data-id="${r.id}" data-action="toggle"></div>
     <div class="reminder-body" data-id="${r.id}" data-action="edit">
       <div class="reminder-title">${escHtml(r.title)}</div>

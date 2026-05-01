@@ -533,6 +533,33 @@ input[type="time"].form-list-input {
   display: flex; align-items: center; justify-content: center;
 }
 
+.drag-handle {
+  cursor: grab;
+  color: var(--smoke);
+  font-size: 14px;
+  padding: 4px 2px;
+  user-select: none;
+  -webkit-user-select: none;
+  letter-spacing: -1px;
+  line-height: 1;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.reminder-item.sortable-ghost {
+  opacity: 0.4;
+  background: var(--moon-white);
+}
+
+.reminder-item.sortable-drag {
+  box-shadow: 0 4px 16px rgba(92, 78, 110, 0.18);
+  opacity: 0.95;
+}
+
 .hidden { display: none !important; }
 
 /* Responsive */
