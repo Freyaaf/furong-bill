@@ -156,6 +156,9 @@ function getFiltered(completed) {
     const hasSortOrder = items.some(r => r.sort_order != null);
     if (hasSortOrder) {
       items.sort((a, b) => {
+        const ga = _dateGroupOrder(a);
+        const gb = _dateGroupOrder(b);
+        if (ga !== gb) return ga - gb;
         const sa = a.sort_order ?? 999999;
         const sb2 = b.sort_order ?? 999999;
         if (sa !== sb2) return sa - sb2;
@@ -211,6 +214,20 @@ function renderCategoryBar() {
     renderCategoryBar();
     render();
   };
+}
+
+function _dateGroupOrder(r) {
+  if (!r.due_date) return 5;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const d = new Date(r.due_date);
+  const due = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.floor((due - today) / 86400000);
+  if (diff < 0) return 0;
+  if (diff === 0) return 1;
+  if (diff === 1) return 2;
+  if (diff <= 7) return 3;
+  return 4;
 }
 
 function getMonthKey(dateStr) {
